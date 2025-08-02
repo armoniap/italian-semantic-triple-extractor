@@ -48,6 +48,10 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: './dist'
+
+    - name: Copy files to root directory
+      if: github.ref == 'refs/heads/main'
+      run: cp -r dist/. .
         
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main'
