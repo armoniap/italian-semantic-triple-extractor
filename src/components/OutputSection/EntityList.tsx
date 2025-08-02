@@ -18,41 +18,44 @@ const EntityList: React.FC<EntityListProps> = ({ entities }) => {
   }
 
   // Group entities by type for better visualization
-  const groupedEntities = entities.reduce((groups, entity) => {
-    const type = entity.type;
-    if (!groups[type]) {
-      groups[type] = [];
-    }
-    groups[type].push(entity);
-    return groups;
-  }, {} as Record<string, ItalianEntity[]>);
+  const groupedEntities = entities.reduce(
+    (groups, entity) => {
+      const type = entity.type;
+      if (!groups[type]) {
+        groups[type] = [];
+      }
+      groups[type].push(entity);
+      return groups;
+    },
+    {} as Record<string, ItalianEntity[]>
+  );
 
   const getEntityTypeLabel = (type: string): string => {
     const typeLabels: Record<string, string> = {
-      'PERSON': 'Persone',
-      'LOCATION': 'Luoghi',
-      'ITALIAN_CITY': 'Città Italiane',
-      'ITALIAN_REGION': 'Regioni Italiane',
-      'ORGANIZATION': 'Organizzazioni',
-      'DATE': 'Date',
-      'EVENT': 'Eventi',
-      'MONUMENT': 'Monumenti',
-      'COMPANY': 'Aziende'
+      PERSON: 'Persone',
+      LOCATION: 'Luoghi',
+      ITALIAN_CITY: 'Città Italiane',
+      ITALIAN_REGION: 'Regioni Italiane',
+      ORGANIZATION: 'Organizzazioni',
+      DATE: 'Date',
+      EVENT: 'Eventi',
+      MONUMENT: 'Monumenti',
+      COMPANY: 'Aziende',
     };
     return typeLabels[type] || type.replace('_', ' ');
   };
 
   const getEntityTypeColor = (type: string): string => {
     const colors: Record<string, string> = {
-      'PERSON': 'bg-blue-100 text-blue-800',
-      'LOCATION': 'bg-green-100 text-green-800',
-      'ITALIAN_CITY': 'bg-green-100 text-green-800',
-      'ITALIAN_REGION': 'bg-green-100 text-green-800',
-      'ORGANIZATION': 'bg-purple-100 text-purple-800',
-      'DATE': 'bg-yellow-100 text-yellow-800',
-      'EVENT': 'bg-pink-100 text-pink-800',
-      'MONUMENT': 'bg-indigo-100 text-indigo-800',
-      'COMPANY': 'bg-purple-100 text-purple-800'
+      PERSON: 'bg-blue-100 text-blue-800',
+      LOCATION: 'bg-green-100 text-green-800',
+      ITALIAN_CITY: 'bg-green-100 text-green-800',
+      ITALIAN_REGION: 'bg-green-100 text-green-800',
+      ORGANIZATION: 'bg-purple-100 text-purple-800',
+      DATE: 'bg-yellow-100 text-yellow-800',
+      EVENT: 'bg-pink-100 text-pink-800',
+      MONUMENT: 'bg-indigo-100 text-indigo-800',
+      COMPANY: 'bg-purple-100 text-purple-800',
     };
     return colors[type] || 'bg-gray-100 text-gray-800';
   };
@@ -65,14 +68,15 @@ const EntityList: React.FC<EntityListProps> = ({ entities }) => {
             <h4 className="text-sm font-medium text-gray-900 flex items-center justify-between">
               {getEntityTypeLabel(type)}
               <span className="text-xs text-gray-500">
-                {typeEntities.length} {typeEntities.length === 1 ? 'elemento' : 'elementi'}
+                {typeEntities.length}{' '}
+                {typeEntities.length === 1 ? 'elemento' : 'elementi'}
               </span>
             </h4>
           </div>
-          
+
           <div className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {typeEntities.map((entity) => (
+              {typeEntities.map(entity => (
                 <div
                   key={entity.id}
                   onClick={() => selectEntity(entity)}
@@ -88,7 +92,9 @@ const EntityList: React.FC<EntityListProps> = ({ entities }) => {
                         {entity.text}
                       </h5>
                       <div className="mt-1 flex items-center space-x-2">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getEntityTypeColor(entity.type)}`}>
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getEntityTypeColor(entity.type)}`}
+                        >
                           {entity.type.replace('_', ' ')}
                         </span>
                         <span className="text-xs text-gray-500">
@@ -97,7 +103,7 @@ const EntityList: React.FC<EntityListProps> = ({ entities }) => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Additional metadata */}
                   {entity.metadata && (
                     <div className="mt-2 space-y-1">
@@ -113,7 +119,7 @@ const EntityList: React.FC<EntityListProps> = ({ entities }) => {
                       )}
                     </div>
                   )}
-                  
+
                   {/* External links */}
                   {(entity.wikipediaUrl || entity.dbpediaUrl) && (
                     <div className="mt-2 flex space-x-2">
@@ -123,7 +129,7 @@ const EntityList: React.FC<EntityListProps> = ({ entities }) => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-blue-600 hover:text-blue-700"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={e => e.stopPropagation()}
                         >
                           Wikipedia
                         </a>
@@ -134,7 +140,7 @@ const EntityList: React.FC<EntityListProps> = ({ entities }) => {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-xs text-blue-600 hover:text-blue-700"
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={e => e.stopPropagation()}
                         >
                           DBpedia
                         </a>

@@ -31,7 +31,8 @@ export interface ExportData {
 }
 
 export class ExportService {
-  private static readonly TOOL_NAME = 'Estrattore di Triple Semantiche Italiane';
+  private static readonly TOOL_NAME =
+    'Estrattore di Triple Semantiche Italiane';
   private static readonly VERSION = '1.0.0';
 
   static async exportResults(
@@ -41,8 +42,13 @@ export class ExportService {
     analytics?: TripleAnalytics,
     originalText?: string
   ): Promise<void> {
-    const exportData = this.prepareItalianExportData(entities, triples, analytics, originalText);
-    
+    const exportData = this.prepareItalianExportData(
+      entities,
+      triples,
+      analytics,
+      originalText
+    );
+
     let content: string;
     let mimeType: string;
     let fileExtension: string;
@@ -53,46 +59,50 @@ export class ExportService {
         mimeType = 'application/json';
         fileExtension = 'json';
         break;
-        
+
       case 'csv':
         content = this.exportToCSV(exportData, options);
         mimeType = 'text/csv';
         fileExtension = 'csv';
         break;
-        
+
       case 'rdf':
         content = this.exportToRDF(exportData, options);
         mimeType = 'application/rdf+xml';
         fileExtension = 'rdf';
         break;
-        
+
       case 'turtle':
         content = this.exportToTurtle(exportData, options);
         mimeType = 'text/turtle';
         fileExtension = 'ttl';
         break;
-        
+
       case 'xml':
         content = this.exportToXML(exportData, options);
         mimeType = 'application/xml';
         fileExtension = 'xml';
         break;
-        
+
       default:
-        throw new Error(`Formato di esportazione non supportato: ${options.format}`);
+        throw new Error(
+          `Formato di esportazione non supportato: ${options.format}`
+        );
     }
 
     const filename = options.filename || this.generateFilename(fileExtension);
-    
+
     // Ensure proper UTF-8 encoding with BOM for Italian characters
-    const utf8Bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    const utf8Bom = new Uint8Array([0xef, 0xbb, 0xbf]);
     const contentBytes = new TextEncoder().encode(content);
     const combinedArray = new Uint8Array(utf8Bom.length + contentBytes.length);
     combinedArray.set(utf8Bom);
     combinedArray.set(contentBytes, utf8Bom.length);
-    
-    const blob = new Blob([combinedArray], { type: mimeType + ';charset=utf-8' });
-    
+
+    const blob = new Blob([combinedArray], {
+      type: mimeType + ';charset=utf-8',
+    });
+
     saveAs(blob, filename);
   }
 
@@ -113,23 +123,33 @@ export class ExportService {
         confidence: this.calculateOverallConfidence(entities, triples),
         language: 'it',
         tool: this.TOOL_NAME,
-        version: this.VERSION
+        version: this.VERSION,
       },
       italianMetadata: {
-        linguisticFeatures: originalText ? originalText.match(/[àèìòù]/g)?.length || 0 : 0,
-        culturalRelevance: entities.filter(e => e.type.includes('ITALIAN')).length / Math.max(entities.length, 1),
-        geographicScope: entities.filter(e => e.metadata?.region).map(e => e.metadata?.region),
-        historicalContext: entities.filter(e => e.type.includes('HISTORICAL')).length,
+        linguisticFeatures: originalText
+          ? originalText.match(/[àèìòù]/g)?.length || 0
+          : 0,
+        culturalRelevance:
+          entities.filter(e => e.type.includes('ITALIAN')).length /
+          Math.max(entities.length, 1),
+        geographicScope: entities
+          .filter(e => e.metadata?.region)
+          .map(e => e.metadata?.region),
+        historicalContext: entities.filter(e => e.type.includes('HISTORICAL'))
+          .length,
         exportFormat: 'UTF-8 con BOM per caratteri italiani',
-        vocabularyUsed: 'Ontologia italiana specializzata'
-      }
+        vocabularyUsed: 'Ontologia italiana specializzata',
+      },
     };
   }
 
-  private static exportToItalianJSON(data: ExportData & { italianMetadata?: any }, options: ExportOptions): string {
+  private static exportToItalianJSON(
+    data: ExportData & { italianMetadata?: any },
+    options: ExportOptions
+  ): string {
     const exportObject: any = {
       entita: data.entities,
-      triple: data.triples
+      triple: data.triples,
     };
 
     if (options.includeAnalytics && data.analytics) {
@@ -141,9 +161,9 @@ export class ExportService {
         ...data.metadata,
         strumento: data.metadata.tool,
         lingua: 'italiano',
-        esportatoIl: data.metadata.exportedAt
+        esportatoIl: data.metadata.exportedAt,
       };
-      
+
       if (data.italianMetadata) {
         exportObject.metadatiItaliani = data.italianMetadata;
       }
@@ -167,7 +187,7 @@ export class ExportService {
       endOffset: entity.endOffset,
       region: entity.metadata?.region || '',
       culturalContext: entity.metadata?.culturalContext || '',
-      wikipediaUrl: entity.wikipediaUrl || ''
+      wikipediaUrl: entity.wikipediaUrl || '',
     }));
 
     csvContent += Papa.unparse(entitiesData) + '\n\n';
@@ -181,7 +201,7 @@ export class ExportService {
       predicateType: triple.predicate.type,
       object: triple.object.text,
       confidence: triple.confidence,
-      context: triple.context || ''
+      context: triple.context || '',
     }));
 
     csvContent += Papa.unparse(triplesData) + '\n\n';
@@ -189,24 +209,29 @@ export class ExportService {
     // Add metadata if requested
     if (options.includeMetadata) {
       csvContent += 'METADATA\n';
-      const metadataArray = Object.entries(data.metadata).map(([key, value]) => ({
-        property: key,
-        value: value?.toString() || ''
-      }));
+      const metadataArray = Object.entries(data.metadata).map(
+        ([key, value]) => ({
+          property: key,
+          value: value?.toString() || '',
+        })
+      );
       csvContent += Papa.unparse(metadataArray);
     }
 
     return csvContent;
   }
 
-  private static exportToRDF(data: ExportData, _options: ExportOptions): string {
+  private static exportToRDF(
+    data: ExportData,
+    _options: ExportOptions
+  ): string {
     const ns = {
       rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
       rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
       ite: 'http://italian-triple-extractor.org/ontology#',
       foaf: 'http://xmlns.com/foaf/0.1/',
       geo: 'http://www.w3.org/2003/01/geo/wgs84_pos#',
-      time: 'http://www.w3.org/2006/time#'
+      time: 'http://www.w3.org/2006/time#',
     };
 
     let rdf = `<?xml version="1.0" encoding="UTF-8"?>
@@ -223,7 +248,7 @@ export class ExportService {
     // Export entities
     data.entities.forEach(entity => {
       const entityUri = `${ns.ite}entity/${encodeURIComponent(entity.id)}`;
-      
+
       rdf += `  <ite:Entity rdf:about="${entityUri}">
     <rdfs:label>${this.escapeXML(entity.text)}</rdfs:label>
     <ite:entityType>${entity.type}</ite:entityType>
@@ -274,7 +299,10 @@ export class ExportService {
     return rdf;
   }
 
-  private static exportToTurtle(data: ExportData, _options: ExportOptions): string {
+  private static exportToTurtle(
+    data: ExportData,
+    _options: ExportOptions
+  ): string {
     const prefixes = `@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix ite: <http://italian-triple-extractor.org/ontology#> .
@@ -288,7 +316,7 @@ export class ExportService {
     // Export entities
     data.entities.forEach(entity => {
       const entityId = `ite:entity_${entity.id}`;
-      
+
       turtle += `${entityId} a ite:Entity ;
   rdfs:label "${this.escapeTurtle(entity.text)}" ;
   ite:entityType "${entity.type}" ;
@@ -419,15 +447,21 @@ export class ExportService {
       .replace(/\t/g, '\\t');
   }
 
-  private static calculateOverallConfidence(entities: ItalianEntity[], triples: SemanticTriple[]): number {
+  private static calculateOverallConfidence(
+    entities: ItalianEntity[],
+    triples: SemanticTriple[]
+  ): number {
     const allConfidences = [
       ...entities.map(e => e.confidence),
-      ...triples.map(t => t.confidence)
+      ...triples.map(t => t.confidence),
     ];
 
     if (allConfidences.length === 0) return 0;
-    
-    return allConfidences.reduce((sum, conf) => sum + conf, 0) / allConfidences.length;
+
+    return (
+      allConfidences.reduce((sum, conf) => sum + conf, 0) /
+      allConfidences.length
+    );
   }
 
   private static generateFilename(extension: string): string {
@@ -436,27 +470,36 @@ export class ExportService {
   }
 
   // Quick export methods for common formats
-  static async exportAsJSON(entities: ItalianEntity[], triples: SemanticTriple[]): Promise<void> {
+  static async exportAsJSON(
+    entities: ItalianEntity[],
+    triples: SemanticTriple[]
+  ): Promise<void> {
     await this.exportResults(entities, triples, {
       format: 'json',
       includeMetadata: true,
-      includeAnalytics: false
+      includeAnalytics: false,
     });
   }
 
-  static async exportAsCSV(entities: ItalianEntity[], triples: SemanticTriple[]): Promise<void> {
+  static async exportAsCSV(
+    entities: ItalianEntity[],
+    triples: SemanticTriple[]
+  ): Promise<void> {
     await this.exportResults(entities, triples, {
       format: 'csv',
       includeMetadata: true,
-      includeAnalytics: false
+      includeAnalytics: false,
     });
   }
 
-  static async exportAsRDF(entities: ItalianEntity[], triples: SemanticTriple[]): Promise<void> {
+  static async exportAsRDF(
+    entities: ItalianEntity[],
+    triples: SemanticTriple[]
+  ): Promise<void> {
     await this.exportResults(entities, triples, {
       format: 'rdf',
       includeMetadata: true,
-      includeAnalytics: false
+      includeAnalytics: false,
     });
   }
 }

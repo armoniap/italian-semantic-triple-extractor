@@ -2,15 +2,15 @@
  * Italian Semantic Triple Extraction Service
  */
 
-import { 
-  SemanticTriple, 
-  ItalianPredicate, 
-  ItalianPredicateType, 
+import {
+  SemanticTriple,
+  ItalianPredicate,
+  ItalianPredicateType,
   TripleExtractionResult,
   TripleGraph,
   TripleNode,
   TripleEdge,
-  TripleAnalytics 
+  TripleAnalytics,
 } from '@/types/triples';
 import { ItalianEntity } from '@/types/entities';
 import { GeminiAPIService } from './geminiAPI';
@@ -25,7 +25,7 @@ export class ItalianTripleExtractor {
   }
 
   async extractTriples(
-    text: string, 
+    text: string,
     entities?: ItalianEntity[]
   ): Promise<TripleExtractionResult> {
     const startTime = Date.now();
@@ -33,22 +33,37 @@ export class ItalianTripleExtractor {
     try {
       // Pre-process text for Italian linguistic patterns
       const preprocessedText = this.preprocessItalianText(text);
-      
+
       // Extract using AI
-      const aiResult = await this.geminiService.analyzeItalianText(preprocessedText, 'triples');
-      
+      const aiResult = await this.geminiService.analyzeItalianText(
+        preprocessedText,
+        'triples'
+      );
+
       // Extract using Italian-specific patterns
-      const patternBasedTriples = this.extractPatternBasedTriples(preprocessedText, entities);
-      
+      const patternBasedTriples = this.extractPatternBasedTriples(
+        preprocessedText,
+        entities
+      );
+
       // Merge and validate triples
-      const mergedTriples = this.mergeTripleResults(aiResult.triples || [], patternBasedTriples, text, entities);
-      
+      const mergedTriples = this.mergeTripleResults(
+        aiResult.triples || [],
+        patternBasedTriples,
+        text,
+        entities
+      );
+
       // Apply Italian cultural context scoring
-      const contextScoredTriples = this.applyCulturalContextScoring(mergedTriples, entities);
-      
+      const contextScoredTriples = this.applyCulturalContextScoring(
+        mergedTriples,
+        entities
+      );
+
       // Validate semantic consistency
-      const validatedTriples = this.validateSemanticConsistency(contextScoredTriples);
-      
+      const validatedTriples =
+        this.validateSemanticConsistency(contextScoredTriples);
+
       const confidence = this.calculateOverallConfidence(validatedTriples);
       const processingTime = Date.now() - startTime;
 
@@ -57,7 +72,7 @@ export class ItalianTripleExtractor {
         confidence,
         processingTime,
         sourceText: text,
-        extractedRelations: validatedTriples.length
+        extractedRelations: validatedTriples.length,
       };
     } catch (error) {
       console.error('Triple extraction failed:', error);
@@ -65,10 +80,9 @@ export class ItalianTripleExtractor {
     }
   }
 
-
   private createSemanticTriple(
-    rawTriple: any, 
-    index: number, 
+    rawTriple: any,
+    index: number,
     originalText: string,
     entities?: ItalianEntity[]
   ): SemanticTriple | null {
@@ -81,7 +95,7 @@ export class ItalianTripleExtractor {
 
       // Normalize predicate
       const predicate = this.normalizePredicate(rawTriple.predicate);
-      
+
       // Create subject and object entities
       const subject = this.createTripleEntity(rawTriple.subject, entities);
       const object = this.createTripleEntity(rawTriple.object, entities);
@@ -96,7 +110,7 @@ export class ItalianTripleExtractor {
         object,
         confidence: Math.min(Math.max(rawTriple.confidence || 0.5, 0), 1),
         context: rawTriple.context || context,
-        source: this.findTripleSource(rawTriple, originalText)
+        source: this.findTripleSource(rawTriple, originalText),
       };
     } catch (error) {
       console.error('Failed to create semantic triple:', error);
@@ -117,84 +131,108 @@ export class ItalianTripleExtractor {
 
   private createCustomItalianPredicate(rawPredicate: string): ItalianPredicate {
     // Enhanced Italian verb phrases mapping with semantic weights
-    const italianPredicateMapping: Record<string, { type: ItalianPredicateType; weight: number }> = {
+    const italianPredicateMapping: Record<
+      string,
+      { type: ItalianPredicateType; weight: number }
+    > = {
       // Birth and death relationships
       'nato a': { type: ItalianPredicateType.BORN_IN, weight: 0.95 },
       'nato in': { type: ItalianPredicateType.BORN_IN, weight: 0.95 },
       'nacque a': { type: ItalianPredicateType.BORN_IN, weight: 0.95 },
       'nacque in': { type: ItalianPredicateType.BORN_IN, weight: 0.95 },
-      'morto a': { type: ItalianPredicateType.DIED_IN, weight: 0.90 },
-      'morto in': { type: ItalianPredicateType.DIED_IN, weight: 0.90 },
-      'morì a': { type: ItalianPredicateType.DIED_IN, weight: 0.90 },
-      'morì in': { type: ItalianPredicateType.DIED_IN, weight: 0.90 },
+      'morto a': { type: ItalianPredicateType.DIED_IN, weight: 0.9 },
+      'morto in': { type: ItalianPredicateType.DIED_IN, weight: 0.9 },
+      'morì a': { type: ItalianPredicateType.DIED_IN, weight: 0.9 },
+      'morì in': { type: ItalianPredicateType.DIED_IN, weight: 0.9 },
       'deceduto a': { type: ItalianPredicateType.DIED_IN, weight: 0.85 },
-      
+
       // Geographic relationships
-      'situato a': { type: ItalianPredicateType.LOCATED_IN, weight: 0.90 },
-      'situato in': { type: ItalianPredicateType.LOCATED_IN, weight: 0.90 },
+      'situato a': { type: ItalianPredicateType.LOCATED_IN, weight: 0.9 },
+      'situato in': { type: ItalianPredicateType.LOCATED_IN, weight: 0.9 },
       'si trova a': { type: ItalianPredicateType.LOCATED_IN, weight: 0.85 },
       'si trova in': { type: ItalianPredicateType.LOCATED_IN, weight: 0.85 },
-      'ubicato a': { type: ItalianPredicateType.LOCATED_IN, weight: 0.80 },
+      'ubicato a': { type: ItalianPredicateType.LOCATED_IN, weight: 0.8 },
       'posizionato in': { type: ItalianPredicateType.LOCATED_IN, weight: 0.75 },
-      'confina con': { type: ItalianPredicateType.BORDERS_WITH, weight: 0.90 },
-      'al confine con': { type: ItalianPredicateType.BORDERS_WITH, weight: 0.85 },
-      'è vicino a': { type: ItalianPredicateType.NEAR, weight: 0.70 },
+      'confina con': { type: ItalianPredicateType.BORDERS_WITH, weight: 0.9 },
+      'al confine con': {
+        type: ItalianPredicateType.BORDERS_WITH,
+        weight: 0.85,
+      },
+      'è vicino a': { type: ItalianPredicateType.NEAR, weight: 0.7 },
       'nelle vicinanze di': { type: ItalianPredicateType.NEAR, weight: 0.65 },
-      
+
       // Administrative relationships
       'capitale di': { type: ItalianPredicateType.CAPITAL_OF, weight: 0.95 },
-      'è la capitale di': { type: ItalianPredicateType.CAPITAL_OF, weight: 0.95 },
-      'capoluogo di': { type: ItalianPredicateType.CAPITAL_OF, weight: 0.90 },
+      'è la capitale di': {
+        type: ItalianPredicateType.CAPITAL_OF,
+        weight: 0.95,
+      },
+      'capoluogo di': { type: ItalianPredicateType.CAPITAL_OF, weight: 0.9 },
       'è parte di': { type: ItalianPredicateType.PART_OF, weight: 0.85 },
-      'appartiene a': { type: ItalianPredicateType.PART_OF, weight: 0.80 },
-      
+      'appartiene a': { type: ItalianPredicateType.PART_OF, weight: 0.8 },
+
       // Cultural and artistic relationships
-      'ha fondato': { type: ItalianPredicateType.FOUNDED, weight: 0.90 },
-      'fondò': { type: ItalianPredicateType.FOUNDED, weight: 0.90 },
+      'ha fondato': { type: ItalianPredicateType.FOUNDED, weight: 0.9 },
+      fondò: { type: ItalianPredicateType.FOUNDED, weight: 0.9 },
       'ha creato': { type: ItalianPredicateType.CREATED, weight: 0.85 },
-      'creò': { type: ItalianPredicateType.CREATED, weight: 0.85 },
-      'ha dipinto': { type: ItalianPredicateType.PAINTED, weight: 0.90 },
-      'dipinse': { type: ItalianPredicateType.PAINTED, weight: 0.90 },
+      creò: { type: ItalianPredicateType.CREATED, weight: 0.85 },
+      'ha dipinto': { type: ItalianPredicateType.PAINTED, weight: 0.9 },
+      dipinse: { type: ItalianPredicateType.PAINTED, weight: 0.9 },
       'ha affrescato': { type: ItalianPredicateType.PAINTED, weight: 0.85 },
-      'ha scritto': { type: ItalianPredicateType.WROTE, weight: 0.90 },
-      'scrisse': { type: ItalianPredicateType.WROTE, weight: 0.90 },
+      'ha scritto': { type: ItalianPredicateType.WROTE, weight: 0.9 },
+      scrisse: { type: ItalianPredicateType.WROTE, weight: 0.9 },
       'ha composto': { type: ItalianPredicateType.COMPOSED, weight: 0.85 },
-      'compose': { type: ItalianPredicateType.COMPOSED, weight: 0.85 },
-      'ha progettato': { type: ItalianPredicateType.DESIGNED, weight: 0.80 },
-      'progettò': { type: ItalianPredicateType.DESIGNED, weight: 0.80 },
+      compose: { type: ItalianPredicateType.COMPOSED, weight: 0.85 },
+      'ha progettato': { type: ItalianPredicateType.DESIGNED, weight: 0.8 },
+      progettò: { type: ItalianPredicateType.DESIGNED, weight: 0.8 },
       'ha costruito': { type: ItalianPredicateType.BUILT, weight: 0.85 },
-      'costruì': { type: ItalianPredicateType.BUILT, weight: 0.85 },
-      
+      costruì: { type: ItalianPredicateType.BUILT, weight: 0.85 },
+
       // Political and institutional relationships
       'è sindaco di': { type: ItalianPredicateType.MAYOR_OF, weight: 0.95 },
       'sindaco di': { type: ItalianPredicateType.MAYOR_OF, weight: 0.95 },
-      'è presidente di': { type: ItalianPredicateType.PRESIDENT_OF, weight: 0.95 },
-      'presidente di': { type: ItalianPredicateType.PRESIDENT_OF, weight: 0.95 },
-      'è ministro di': { type: ItalianPredicateType.MINISTER_OF, weight: 0.90 },
-      'ministro di': { type: ItalianPredicateType.MINISTER_OF, weight: 0.90 },
-      'governò': { type: ItalianPredicateType.GOVERNED, weight: 0.85 },
+      'è presidente di': {
+        type: ItalianPredicateType.PRESIDENT_OF,
+        weight: 0.95,
+      },
+      'presidente di': {
+        type: ItalianPredicateType.PRESIDENT_OF,
+        weight: 0.95,
+      },
+      'è ministro di': { type: ItalianPredicateType.MINISTER_OF, weight: 0.9 },
+      'ministro di': { type: ItalianPredicateType.MINISTER_OF, weight: 0.9 },
+      governò: { type: ItalianPredicateType.GOVERNED, weight: 0.85 },
       'ha governato': { type: ItalianPredicateType.GOVERNED, weight: 0.85 },
-      
+
       // Professional relationships
-      'lavora per': { type: ItalianPredicateType.WORKS_FOR, weight: 0.80 },
-      'lavorò per': { type: ItalianPredicateType.WORKS_FOR, weight: 0.80 },
+      'lavora per': { type: ItalianPredicateType.WORKS_FOR, weight: 0.8 },
+      'lavorò per': { type: ItalianPredicateType.WORKS_FOR, weight: 0.8 },
       'è membro di': { type: ItalianPredicateType.MEMBER_OF, weight: 0.75 },
       'membro di': { type: ItalianPredicateType.MEMBER_OF, weight: 0.75 },
-      
+
       // Religious and cultural relationships
-      'santo patrono di': { type: ItalianPredicateType.PATRON_SAINT_OF, weight: 0.95 },
-      'patrono di': { type: ItalianPredicateType.PATRON_SAINT_OF, weight: 0.90 },
+      'santo patrono di': {
+        type: ItalianPredicateType.PATRON_SAINT_OF,
+        weight: 0.95,
+      },
+      'patrono di': { type: ItalianPredicateType.PATRON_SAINT_OF, weight: 0.9 },
       'si celebra a': { type: ItalianPredicateType.CELEBRATES, weight: 0.75 },
-      'tradizionale di': { type: ItalianPredicateType.TRADITIONAL_IN, weight: 0.70 },
-      'tipico di': { type: ItalianPredicateType.TRADITIONAL_IN, weight: 0.70 },
-      
+      'tradizionale di': {
+        type: ItalianPredicateType.TRADITIONAL_IN,
+        weight: 0.7,
+      },
+      'tipico di': { type: ItalianPredicateType.TRADITIONAL_IN, weight: 0.7 },
+
       // Temporal relationships
       'avvenne a': { type: ItalianPredicateType.HAPPENED_IN, weight: 0.85 },
       'avvenne in': { type: ItalianPredicateType.HAPPENED_IN, weight: 0.85 },
-      'ebbe luogo a': { type: ItalianPredicateType.HAPPENED_IN, weight: 0.80 },
-      'si svolse a': { type: ItalianPredicateType.HAPPENED_IN, weight: 0.80 },
-      'durante il': { type: ItalianPredicateType.OCCURRED_DURING, weight: 0.70 },
-      'nel periodo di': { type: ItalianPredicateType.OCCURRED_DURING, weight: 0.70 }
+      'ebbe luogo a': { type: ItalianPredicateType.HAPPENED_IN, weight: 0.8 },
+      'si svolse a': { type: ItalianPredicateType.HAPPENED_IN, weight: 0.8 },
+      'durante il': { type: ItalianPredicateType.OCCURRED_DURING, weight: 0.7 },
+      'nel periodo di': {
+        type: ItalianPredicateType.OCCURRED_DURING,
+        weight: 0.7,
+      },
     };
 
     const mapping = italianPredicateMapping[rawPredicate.toLowerCase()];
@@ -205,23 +243,26 @@ export class ItalianTripleExtractor {
       id: `predicate_${Date.now()}`,
       label: rawPredicate,
       type: predicateType,
-      semanticWeight
+      semanticWeight,
     };
   }
 
-  private createTripleEntity(rawEntity: string, knownEntities?: ItalianEntity[]) {
+  private createTripleEntity(
+    rawEntity: string,
+    knownEntities?: ItalianEntity[]
+  ) {
     // Try to match with known entities first
     if (knownEntities) {
-      const matchedEntity = knownEntities.find(entity => 
-        entity.text.toLowerCase() === rawEntity.toLowerCase()
+      const matchedEntity = knownEntities.find(
+        entity => entity.text.toLowerCase() === rawEntity.toLowerCase()
       );
-      
+
       if (matchedEntity) {
         return {
           id: matchedEntity.id,
           text: matchedEntity.text,
           type: matchedEntity.type,
-          entityRef: matchedEntity
+          entityRef: matchedEntity,
         };
       }
     }
@@ -230,19 +271,23 @@ export class ItalianTripleExtractor {
     return {
       id: `entity_${Date.now()}_${Math.random()}`,
       text: rawEntity.trim(),
-      type: 'UNKNOWN'
+      type: 'UNKNOWN',
     };
   }
 
   private extractContext(rawTriple: any, originalText: string): string {
     // Try to find the sentence containing the triple
     const sentences = originalText.split(/[.!?]+/);
-    
+
     for (const sentence of sentences) {
       const normalizedSentence = sentence.toLowerCase();
-      const hasSubject = normalizedSentence.includes(rawTriple.subject.toLowerCase());
-      const hasObject = normalizedSentence.includes(rawTriple.object.toLowerCase());
-      
+      const hasSubject = normalizedSentence.includes(
+        rawTriple.subject.toLowerCase()
+      );
+      const hasObject = normalizedSentence.includes(
+        rawTriple.object.toLowerCase()
+      );
+
       if (hasSubject && hasObject) {
         return sentence.trim();
       }
@@ -258,7 +303,7 @@ export class ItalianTripleExtractor {
       return {
         text: context,
         startOffset,
-        endOffset: startOffset + context.length
+        endOffset: startOffset + context.length,
       };
     }
     return undefined;
@@ -266,8 +311,11 @@ export class ItalianTripleExtractor {
 
   private calculateOverallConfidence(triples: SemanticTriple[]): number {
     if (triples.length === 0) return 0;
-    
-    const totalConfidence = triples.reduce((sum, triple) => sum + triple.confidence, 0);
+
+    const totalConfidence = triples.reduce(
+      (sum, triple) => sum + triple.confidence,
+      0
+    );
     return totalConfidence / triples.length;
   }
 
@@ -281,40 +329,40 @@ export class ItalianTripleExtractor {
         label: 'si trova in',
         type: ItalianPredicateType.LOCATED_IN,
         inverse: 'contiene',
-        semanticWeight: 0.9
+        semanticWeight: 0.9,
       },
       {
         id: 'born_in',
         label: 'nato in',
         type: ItalianPredicateType.BORN_IN,
-        semanticWeight: 0.95
+        semanticWeight: 0.95,
       },
       {
         id: 'founded',
         label: 'ha fondato',
         type: ItalianPredicateType.FOUNDED,
         inverse: 'fondato da',
-        semanticWeight: 0.85
+        semanticWeight: 0.85,
       },
       {
         id: 'created',
         label: 'ha creato',
         type: ItalianPredicateType.CREATED,
         inverse: 'creato da',
-        semanticWeight: 0.8
+        semanticWeight: 0.8,
       },
       {
         id: 'mayor_of',
         label: 'sindaco di',
         type: ItalianPredicateType.MAYOR_OF,
-        semanticWeight: 0.9
+        semanticWeight: 0.9,
       },
       {
         id: 'capital_of',
         label: 'capitale di',
         type: ItalianPredicateType.CAPITAL_OF,
-        semanticWeight: 0.95
-      }
+        semanticWeight: 0.95,
+      },
     ];
 
     italianPredicates.forEach(predicate => {
@@ -336,8 +384,8 @@ export class ItalianTripleExtractor {
         totalNodes: nodes.length,
         totalEdges: edges.length,
         density: this.calculateGraphDensity(nodes.length, edges.length),
-        components: this.countConnectedComponents(nodes, edges)
-      }
+        components: this.countConnectedComponents(nodes, edges),
+      },
     };
   }
 
@@ -353,7 +401,7 @@ export class ItalianTripleExtractor {
           type: triple.subject.type,
           entityType: triple.subject.entityRef?.type,
           size: 1,
-          color: this.getNodeColor(triple.subject.type)
+          color: this.getNodeColor(triple.subject.type),
         });
       } else {
         // Increase size for existing nodes
@@ -369,7 +417,7 @@ export class ItalianTripleExtractor {
           type: triple.object.type,
           entityType: triple.object.entityRef?.type,
           size: 1,
-          color: this.getNodeColor(triple.object.type)
+          color: this.getNodeColor(triple.object.type),
         });
       } else {
         const node = nodeMap.get(triple.object.id)!;
@@ -388,18 +436,18 @@ export class ItalianTripleExtractor {
       label: triple.predicate.label,
       predicateType: triple.predicate.type,
       weight: triple.confidence,
-      color: this.getEdgeColor(triple.predicate.type)
+      color: this.getEdgeColor(triple.predicate.type),
     }));
   }
 
   private getNodeColor(entityType: string): string {
     const colorMap: Record<string, string> = {
-      'PERSON': '#3B82F6',
-      'LOCATION': '#10B981',
-      'ORGANIZATION': '#8B5CF6',
-      'EVENT': '#EC4899',
-      'DATE': '#F59E0B',
-      'UNKNOWN': '#6B7280'
+      PERSON: '#3B82F6',
+      LOCATION: '#10B981',
+      ORGANIZATION: '#8B5CF6',
+      EVENT: '#EC4899',
+      DATE: '#F59E0B',
+      UNKNOWN: '#6B7280',
     };
 
     return colorMap[entityType] || '#6B7280';
@@ -412,7 +460,7 @@ export class ItalianTripleExtractor {
       [ItalianPredicateType.FOUNDED]: '#8B5CF6',
       [ItalianPredicateType.CREATED]: '#EC4899',
       [ItalianPredicateType.MAYOR_OF]: '#F59E0B',
-      [ItalianPredicateType.CAPITAL_OF]: '#EF4444'
+      [ItalianPredicateType.CAPITAL_OF]: '#EF4444',
     } as Record<ItalianPredicateType, string>;
 
     return colorMap[predicateType] || '#6B7280';
@@ -424,7 +472,10 @@ export class ItalianTripleExtractor {
     return edgeCount / maxEdges;
   }
 
-  private countConnectedComponents(nodes: TripleNode[], edges: TripleEdge[]): number {
+  private countConnectedComponents(
+    nodes: TripleNode[],
+    edges: TripleEdge[]
+  ): number {
     // Simple connected components calculation
     const visited = new Set<string>();
     let components = 0;
@@ -472,31 +523,40 @@ export class ItalianTripleExtractor {
     return processed;
   }
 
-  private extractPatternBasedTriples(text: string, _entities?: ItalianEntity[]): any[] {
+  private extractPatternBasedTriples(
+    text: string,
+    _entities?: ItalianEntity[]
+  ): any[] {
     const triples: any[] = [];
     const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
 
     sentences.forEach(sentence => {
       // Extract triples using Italian linguistic patterns
-      const sentenceTriples = this.extractTriplesFromSentence(sentence.trim(), _entities);
+      const sentenceTriples = this.extractTriplesFromSentence(
+        sentence.trim(),
+        _entities
+      );
       triples.push(...sentenceTriples);
     });
 
     return triples;
   }
 
-  private extractTriplesFromSentence(sentence: string, _entities?: ItalianEntity[]): any[] {
+  private extractTriplesFromSentence(
+    sentence: string,
+    _entities?: ItalianEntity[]
+  ): any[] {
     const triples: any[] = [];
 
     // Geographic pattern: "X si trova in Y" / "X è situato in Y"
     this.extractGeographicTriples(sentence, triples);
-    
+
     // Historical pattern: "X nacque a Y" / "X morì in Y"
     this.extractBiographicalTriples(sentence, triples);
-    
+
     // Cultural pattern: "X ha creato Y" / "X dipinse Y"
     this.extractCulturalTriples(sentence, triples);
-    
+
     // Administrative pattern: "X è sindaco di Y" / "X è capitale di Y"
     this.extractAdministrativeTriples(sentence, triples);
 
@@ -509,7 +569,7 @@ export class ItalianTripleExtractor {
       /(\w+(?:\s+\w+)*)\s+(?:si trova|è situato|è ubicato|è posizionato)\s+(?:a|in|nella|nel|presso)\s+(\w+(?:\s+\w+)*)/gi,
       /(\w+(?:\s+\w+)*)\s+(?:confina con|al confine con)\s+(\w+(?:\s+\w+)*)/gi,
       /(\w+(?:\s+\w+)*)\s+(?:è vicino a|nelle vicinanze di)\s+(\w+(?:\s+\w+)*)/gi,
-      /(\w+(?:\s+\w+)*)\s+(?:è la capitale di|capitale di|capoluogo di)\s+(\w+(?:\s+\w+)*)/gi
+      /(\w+(?:\s+\w+)*)\s+(?:è la capitale di|capitale di|capoluogo di)\s+(\w+(?:\s+\w+)*)/gi,
     ];
 
     patterns.forEach(pattern => {
@@ -521,7 +581,7 @@ export class ItalianTripleExtractor {
           predicate: predicateType,
           object: match[2].trim(),
           confidence: 0.8,
-          context: sentence
+          context: sentence,
         });
       }
     });
@@ -532,7 +592,7 @@ export class ItalianTripleExtractor {
     const patterns = [
       /(\w+(?:\s+\w+)*)\s+(?:nacque|nato|nata)\s+(?:a|in|nella|nel)\s+(\w+(?:\s+\w+)*)/gi,
       /(\w+(?:\s+\w+)*)\s+(?:morì|morto|morta|deceduto|deceduta)\s+(?:a|in|nella|nel)\s+(\w+(?:\s+\w+)*)/gi,
-      /(\w+(?:\s+\w+)*)\s+(?:visse|abitò|risiedette)\s+(?:a|in|nella|nel)\s+(\w+(?:\s+\w+)*)/gi
+      /(\w+(?:\s+\w+)*)\s+(?:visse|abitò|risiedette)\s+(?:a|in|nella|nel)\s+(\w+(?:\s+\w+)*)/gi,
     ];
 
     patterns.forEach(pattern => {
@@ -544,7 +604,7 @@ export class ItalianTripleExtractor {
           predicate: predicateType,
           object: match[2].trim(),
           confidence: 0.85,
-          context: sentence
+          context: sentence,
         });
       }
     });
@@ -556,7 +616,7 @@ export class ItalianTripleExtractor {
       /(\w+(?:\s+\w+)*)\s+(?:ha dipinto|dipinse|affrescò)\s+(\w+(?:\s+\w+)*)/gi,
       /(\w+(?:\s+\w+)*)\s+(?:ha scritto|scrisse|compose)\s+(\w+(?:\s+\w+)*)/gi,
       /(\w+(?:\s+\w+)*)\s+(?:ha creato|creò|ha fondato|fondò)\s+(\w+(?:\s+\w+)*)/gi,
-      /(\w+(?:\s+\w+)*)\s+(?:ha progettato|progettò|ha costruito|costruì)\s+(\w+(?:\s+\w+)*)/gi
+      /(\w+(?:\s+\w+)*)\s+(?:ha progettato|progettò|ha costruito|costruì)\s+(\w+(?:\s+\w+)*)/gi,
     ];
 
     patterns.forEach(pattern => {
@@ -567,8 +627,8 @@ export class ItalianTripleExtractor {
           subject: match[1].trim(),
           predicate: predicateType,
           object: match[2].trim(),
-          confidence: 0.80,
-          context: sentence
+          confidence: 0.8,
+          context: sentence,
         });
       }
     });
@@ -580,25 +640,29 @@ export class ItalianTripleExtractor {
       /(\w+(?:\s+\w+)*)\s+(?:è sindaco di|sindaco di)\s+(\w+(?:\s+\w+)*)/gi,
       /(\w+(?:\s+\w+)*)\s+(?:è presidente di|presidente di)\s+(\w+(?:\s+\w+)*)/gi,
       /(\w+(?:\s+\w+)*)\s+(?:è ministro di|ministro di)\s+(\w+(?:\s+\w+)*)/gi,
-      /(\w+(?:\s+\w+)*)\s+(?:governò|ha governato)\s+(\w+(?:\s+\w+)*)/gi
+      /(\w+(?:\s+\w+)*)\s+(?:governò|ha governato)\s+(\w+(?:\s+\w+)*)/gi,
     ];
 
     patterns.forEach(pattern => {
       let match;
       while ((match = pattern.exec(sentence)) !== null) {
-        const predicateType = this.determineAdministrativePredicateType(match[0]);
+        const predicateType = this.determineAdministrativePredicateType(
+          match[0]
+        );
         triples.push({
           subject: match[1].trim(),
           predicate: predicateType,
           object: match[2].trim(),
           confidence: 0.85,
-          context: sentence
+          context: sentence,
         });
       }
     });
   }
 
-  private determineGeographicPredicateType(matchText: string): ItalianPredicateType {
+  private determineGeographicPredicateType(
+    matchText: string
+  ): ItalianPredicateType {
     const text = matchText.toLowerCase();
     if (text.includes('capitale') || text.includes('capoluogo')) {
       return ItalianPredicateType.CAPITAL_OF;
@@ -611,20 +675,37 @@ export class ItalianTripleExtractor {
     }
   }
 
-  private determineBiographicalPredicateType(matchText: string): ItalianPredicateType {
+  private determineBiographicalPredicateType(
+    matchText: string
+  ): ItalianPredicateType {
     const text = matchText.toLowerCase();
-    if (text.includes('nacque') || text.includes('nato') || text.includes('nata')) {
+    if (
+      text.includes('nacque') ||
+      text.includes('nato') ||
+      text.includes('nata')
+    ) {
       return ItalianPredicateType.BORN_IN;
-    } else if (text.includes('morì') || text.includes('morto') || text.includes('morta') || text.includes('deceduto')) {
+    } else if (
+      text.includes('morì') ||
+      text.includes('morto') ||
+      text.includes('morta') ||
+      text.includes('deceduto')
+    ) {
       return ItalianPredicateType.DIED_IN;
     } else {
       return ItalianPredicateType.LIVED_IN;
     }
   }
 
-  private determineCulturalPredicateType(matchText: string): ItalianPredicateType {
+  private determineCulturalPredicateType(
+    matchText: string
+  ): ItalianPredicateType {
     const text = matchText.toLowerCase();
-    if (text.includes('dipinto') || text.includes('dipinse') || text.includes('affrescò')) {
+    if (
+      text.includes('dipinto') ||
+      text.includes('dipinse') ||
+      text.includes('affrescò')
+    ) {
       return ItalianPredicateType.PAINTED;
     } else if (text.includes('scritto') || text.includes('scrisse')) {
       return ItalianPredicateType.WROTE;
@@ -641,7 +722,9 @@ export class ItalianTripleExtractor {
     }
   }
 
-  private determineAdministrativePredicateType(matchText: string): ItalianPredicateType {
+  private determineAdministrativePredicateType(
+    matchText: string
+  ): ItalianPredicateType {
     const text = matchText.toLowerCase();
     if (text.includes('sindaco')) {
       return ItalianPredicateType.MAYOR_OF;
@@ -654,10 +737,18 @@ export class ItalianTripleExtractor {
     }
   }
 
-  private mergeTripleResults(aiTriples: any[], patternTriples: any[], _originalText: string, _entities?: ItalianEntity[]): any[] {
+  private mergeTripleResults(
+    aiTriples: any[],
+    patternTriples: any[],
+    _originalText: string,
+    _entities?: ItalianEntity[]
+  ): any[] {
     const merged = [...aiTriples];
     const existingTripleKeys = new Set(
-      aiTriples.map(t => `${t.subject?.toLowerCase()}-${t.predicate?.toLowerCase()}-${t.object?.toLowerCase()}`)
+      aiTriples.map(
+        t =>
+          `${t.subject?.toLowerCase()}-${t.predicate?.toLowerCase()}-${t.object?.toLowerCase()}`
+      )
     );
 
     // Add pattern-based triples that don't duplicate AI results
@@ -672,60 +763,129 @@ export class ItalianTripleExtractor {
     return merged;
   }
 
-  private applyCulturalContextScoring(triples: any[], entities?: ItalianEntity[]): SemanticTriple[] {
-    return triples.map((triple, index) => {
-      let confidence = triple.confidence || 0.5;
-      
-      // Boost confidence for culturally significant Italian relationships
-      if (this.isItalianCulturallyRelevant(triple.subject, triple.object, triple.predicate)) {
-        confidence = Math.min(confidence + 0.15, 1.0);
-      }
-      
-      // Boost confidence for historically verified relationships
-      if (this.isHistoricallyVerifiable(triple.subject, triple.predicate, triple.object)) {
-        confidence = Math.min(confidence + 0.1, 1.0);
-      }
+  private applyCulturalContextScoring(
+    triples: any[],
+    entities?: ItalianEntity[]
+  ): SemanticTriple[] {
+    return triples
+      .map((triple, index) => {
+        let confidence = triple.confidence || 0.5;
 
-      return this.createSemanticTriple({
-        ...triple,
-        confidence
-      }, index, '', entities);
-    }).filter(triple => triple !== null) as SemanticTriple[];
+        // Boost confidence for culturally significant Italian relationships
+        if (
+          this.isItalianCulturallyRelevant(
+            triple.subject,
+            triple.object,
+            triple.predicate
+          )
+        ) {
+          confidence = Math.min(confidence + 0.15, 1.0);
+        }
+
+        // Boost confidence for historically verified relationships
+        if (
+          this.isHistoricallyVerifiable(
+            triple.subject,
+            triple.predicate,
+            triple.object
+          )
+        ) {
+          confidence = Math.min(confidence + 0.1, 1.0);
+        }
+
+        return this.createSemanticTriple(
+          {
+            ...triple,
+            confidence,
+          },
+          index,
+          '',
+          entities
+        );
+      })
+      .filter(triple => triple !== null) as SemanticTriple[];
   }
 
-  private validateSemanticConsistency(triples: SemanticTriple[]): SemanticTriple[] {
+  private validateSemanticConsistency(
+    triples: SemanticTriple[]
+  ): SemanticTriple[] {
     return triples.filter(triple => {
       // Remove triples with very low confidence
       if (triple.confidence < 0.3) return false;
-      
+
       // Validate geographic consistency
       if (this.isGeographicPredicate(triple.predicate.type)) {
         return this.validateGeographicConsistency(triple);
       }
-      
+
       // Validate temporal consistency
       if (this.isTemporalPredicate(triple.predicate.type)) {
         return this.validateTemporalConsistency(triple);
       }
-      
+
       return true;
     });
   }
 
-  private isItalianCulturallyRelevant(subject: string, object: string, _predicate: string): boolean {
-    const italianCities = ['roma', 'milano', 'napoli', 'firenze', 'venezia', 'bologna', 'torino', 'palermo', 'genova', 'bari'];
-    const italianRegions = ['lazio', 'lombardia', 'campania', 'toscana', 'veneto', 'emilia-romagna', 'piemonte', 'sicilia', 'liguria', 'puglia'];
-    const italianPersonalities = ['leonardo da vinci', 'michelangelo', 'dante', 'galileo', 'giuseppe verdi', 'federico fellini'];
-    
+  private isItalianCulturallyRelevant(
+    subject: string,
+    object: string,
+    _predicate: string
+  ): boolean {
+    const italianCities = [
+      'roma',
+      'milano',
+      'napoli',
+      'firenze',
+      'venezia',
+      'bologna',
+      'torino',
+      'palermo',
+      'genova',
+      'bari',
+    ];
+    const italianRegions = [
+      'lazio',
+      'lombardia',
+      'campania',
+      'toscana',
+      'veneto',
+      'emilia-romagna',
+      'piemonte',
+      'sicilia',
+      'liguria',
+      'puglia',
+    ];
+    const italianPersonalities = [
+      'leonardo da vinci',
+      'michelangelo',
+      'dante',
+      'galileo',
+      'giuseppe verdi',
+      'federico fellini',
+    ];
+
     const subjectLower = subject.toLowerCase();
     const objectLower = object.toLowerCase();
-    
-    return italianCities.some(city => subjectLower.includes(city) || objectLower.includes(city)) ||
-           italianRegions.some(region => subjectLower.includes(region) || objectLower.includes(region)) ||
-           italianPersonalities.some(person => subjectLower.includes(person) || objectLower.includes(person));
+
+    return (
+      italianCities.some(
+        city => subjectLower.includes(city) || objectLower.includes(city)
+      ) ||
+      italianRegions.some(
+        region => subjectLower.includes(region) || objectLower.includes(region)
+      ) ||
+      italianPersonalities.some(
+        person => subjectLower.includes(person) || objectLower.includes(person)
+      )
+    );
   }
 
-  private isHistoricallyVerifiable(subject: string, predicate: string, object: string): boolean {
+  private isHistoricallyVerifiable(
+    subject: string,
+    predicate: string,
+    object: string
+  ): boolean {
     // This could be enhanced with a historical knowledge base
     // For now, we use simple heuristics for well-known historical facts
     const knownFacts = [
@@ -733,13 +893,14 @@ export class ItalianTripleExtractor {
       { subject: 'michelangelo', predicate: 'BORN_IN', object: 'caprese' },
       { subject: 'dante', predicate: 'BORN_IN', object: 'firenze' },
       { subject: 'roma', predicate: 'CAPITAL_OF', object: 'italia' },
-      { subject: 'milano', predicate: 'CAPITAL_OF', object: 'lombardia' }
+      { subject: 'milano', predicate: 'CAPITAL_OF', object: 'lombardia' },
     ];
-    
-    return knownFacts.some(fact => 
-      subject.toLowerCase().includes(fact.subject) &&
-      predicate.includes(fact.predicate) &&
-      object.toLowerCase().includes(fact.object)
+
+    return knownFacts.some(
+      fact =>
+        subject.toLowerCase().includes(fact.subject) &&
+        predicate.includes(fact.predicate) &&
+        object.toLowerCase().includes(fact.object)
     );
   }
 
@@ -749,7 +910,7 @@ export class ItalianTripleExtractor {
       ItalianPredicateType.CAPITAL_OF,
       ItalianPredicateType.BORDERS_WITH,
       ItalianPredicateType.NEAR,
-      ItalianPredicateType.PART_OF
+      ItalianPredicateType.PART_OF,
     ].includes(type);
   }
 
@@ -758,7 +919,7 @@ export class ItalianTripleExtractor {
       ItalianPredicateType.BORN_IN,
       ItalianPredicateType.DIED_IN,
       ItalianPredicateType.HAPPENED_IN,
-      ItalianPredicateType.OCCURRED_DURING
+      ItalianPredicateType.OCCURRED_DURING,
     ].includes(type);
   }
 
@@ -772,45 +933,53 @@ export class ItalianTripleExtractor {
     return true; // Placeholder for now
   }
 
-
   // Analytics methods
   generateAnalytics(triples: SemanticTriple[]): TripleAnalytics {
     const entityFrequency: Record<string, number> = {};
-    const predicateFrequency: Record<ItalianPredicateType, number> = {} as Record<ItalianPredicateType, number>;
-    
+    const predicateFrequency: Record<ItalianPredicateType, number> =
+      {} as Record<ItalianPredicateType, number>;
+
     let totalConfidence = 0;
     const uniqueEntities = new Set<string>();
 
     triples.forEach(triple => {
       // Count entities
-      entityFrequency[triple.subject.text] = (entityFrequency[triple.subject.text] || 0) + 1;
-      entityFrequency[triple.object.text] = (entityFrequency[triple.object.text] || 0) + 1;
-      
+      entityFrequency[triple.subject.text] =
+        (entityFrequency[triple.subject.text] || 0) + 1;
+      entityFrequency[triple.object.text] =
+        (entityFrequency[triple.object.text] || 0) + 1;
+
       uniqueEntities.add(triple.subject.text);
       uniqueEntities.add(triple.object.text);
 
       // Count predicates
-      predicateFrequency[triple.predicate.type] = (predicateFrequency[triple.predicate.type] || 0) + 1;
+      predicateFrequency[triple.predicate.type] =
+        (predicateFrequency[triple.predicate.type] || 0) + 1;
 
       totalConfidence += triple.confidence;
     });
 
     // Find most connected entity
-    const mostConnectedEntity = Object.entries(entityFrequency)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] || '';
+    const mostConnectedEntity =
+      Object.entries(entityFrequency).sort(([, a], [, b]) => b - a)[0]?.[0] ||
+      '';
 
     // Find dominant relation type
-    const dominantRelationType = Object.entries(predicateFrequency)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] as ItalianPredicateType || ItalianPredicateType.ASSOCIATED_WITH;
+    const dominantRelationType =
+      (Object.entries(predicateFrequency).sort(
+        ([, a], [, b]) => b - a
+      )[0]?.[0] as ItalianPredicateType) ||
+      ItalianPredicateType.ASSOCIATED_WITH;
 
     return {
       entityFrequency,
       predicateFrequency,
-      averageConfidence: triples.length > 0 ? totalConfidence / triples.length : 0,
+      averageConfidence:
+        triples.length > 0 ? totalConfidence / triples.length : 0,
       totalTriples: triples.length,
       uniqueEntities: uniqueEntities.size,
       mostConnectedEntity,
-      dominantRelationType
+      dominantRelationType,
     };
   }
 }

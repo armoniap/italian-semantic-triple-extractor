@@ -15,7 +15,7 @@ const OutputSection: React.FC = () => {
     extractionResult,
     tripleResult,
     activeView,
-    setActiveView
+    setActiveView,
   } = useApplication();
 
   const [showExportModal, setShowExportModal] = useState(false);
@@ -23,11 +23,16 @@ const OutputSection: React.FC = () => {
 
   const handleExport = async (format: 'json' | 'csv' | 'rdf') => {
     try {
-      await ExportService.exportResults(entities, triples, {
-        format,
-        includeMetadata: true,
-        includeAnalytics: !!analytics
-      }, analytics || undefined);
+      await ExportService.exportResults(
+        entities,
+        triples,
+        {
+          format,
+          includeMetadata: true,
+          includeAnalytics: !!analytics,
+        },
+        analytics || undefined
+      );
     } catch (error) {
       console.error('Export failed:', error);
     }
@@ -41,7 +46,8 @@ const OutputSection: React.FC = () => {
           Nessun risultato
         </h3>
         <p className="mt-2 text-gray-600">
-          Analizza del testo per vedere le entità e le triple semantiche estratte.
+          Analizza del testo per vedere le entità e le triple semantiche
+          estratte.
         </p>
       </div>
     );
@@ -53,22 +59,22 @@ const OutputSection: React.FC = () => {
       label: 'Entità',
       icon: Eye,
       count: entities.length,
-      description: 'Entità estratte dal testo'
+      description: 'Entità estratte dal testo',
     },
     {
       id: 'triples' as const,
       label: 'Triple',
       icon: Network,
       count: triples.length,
-      description: 'Relazioni semantiche identificate'
+      description: 'Relazioni semantiche identificate',
     },
     {
       id: 'analytics' as const,
       label: 'Analisi',
       icon: BarChart3,
       count: null,
-      description: 'Statistiche e metriche'
-    }
+      description: 'Statistiche e metriche',
+    },
   ];
 
   return (
@@ -78,7 +84,7 @@ const OutputSection: React.FC = () => {
         <h3 className="text-lg font-semibold text-gray-900">
           Risultati Analisi
         </h3>
-        
+
         <div className="flex items-center space-x-2">
           <div className="text-sm text-gray-600">
             {extractionResult && (
@@ -87,7 +93,7 @@ const OutputSection: React.FC = () => {
               </span>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-1">
             <button
               onClick={() => handleExport('json')}
@@ -119,26 +125,32 @@ const OutputSection: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {extractionResult && (
             <div className="bg-white p-4 rounded-lg border">
-              <div className="text-sm text-gray-600">Tempo Estrazione Entità</div>
+              <div className="text-sm text-gray-600">
+                Tempo Estrazione Entità
+              </div>
               <div className="text-2xl font-bold text-gray-900">
                 {extractionResult.processingTime}ms
               </div>
             </div>
           )}
-          
+
           {tripleResult && (
             <div className="bg-white p-4 rounded-lg border">
-              <div className="text-sm text-gray-600">Tempo Estrazione Triple</div>
+              <div className="text-sm text-gray-600">
+                Tempo Estrazione Triple
+              </div>
               <div className="text-2xl font-bold text-gray-900">
                 {tripleResult.processingTime}ms
               </div>
             </div>
           )}
-          
+
           <div className="bg-white p-4 rounded-lg border">
             <div className="text-sm text-gray-600">Lingua Rilevata</div>
             <div className="text-2xl font-bold text-gray-900">
-              {extractionResult?.language === 'it' ? '🇮🇹 Italiano' : '❓ Sconosciuto'}
+              {extractionResult?.language === 'it'
+                ? '🇮🇹 Italiano'
+                : '❓ Sconosciuto'}
             </div>
           </div>
         </div>
@@ -147,10 +159,10 @@ const OutputSection: React.FC = () => {
       {/* View tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
-          {viewTabs.map((tab) => {
+          {viewTabs.map(tab => {
             const Icon = tab.icon;
             const isActive = activeView === tab.id;
-            
+
             return (
               <button
                 key={tab.id}
@@ -164,9 +176,13 @@ const OutputSection: React.FC = () => {
                 <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
                 {tab.count !== null && (
-                  <span className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
-                    isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
-                  }`}>
+                  <span
+                    className={`ml-2 py-0.5 px-2 rounded-full text-xs ${
+                      isActive
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-600'
+                    }`}
+                  >
                     {tab.count}
                   </span>
                 )}
@@ -178,19 +194,15 @@ const OutputSection: React.FC = () => {
 
       {/* Content area */}
       <div className="min-h-96">
-        {activeView === 'entities' && (
-          <EntityList entities={entities} />
-        )}
-        
-        {activeView === 'triples' && (
-          <TripleList triples={triples} />
-        )}
-        
+        {activeView === 'entities' && <EntityList entities={entities} />}
+
+        {activeView === 'triples' && <TripleList triples={triples} />}
+
         {activeView === 'analytics' && analytics && (
           <AnalyticsPanel analytics={analytics} />
         )}
       </div>
-      
+
       {/* Export Modal */}
       <ExportModal
         entities={entities}

@@ -40,7 +40,7 @@ export enum ItalianPredicateType {
   CAPITAL_OF = 'CAPITAL_OF',
   BORDERS_WITH = 'BORDERS_WITH',
   NEAR = 'NEAR',
-  
+
   // Relazioni personali
   BORN_IN = 'BORN_IN',
   DIED_IN = 'DIED_IN',
@@ -49,14 +49,14 @@ export enum ItalianPredicateType {
   FOUNDED = 'FOUNDED',
   MARRIED_TO = 'MARRIED_TO',
   CHILD_OF = 'CHILD_OF',
-  
+
   // Relazioni temporali
   HAPPENED_IN = 'HAPPENED_IN',
   OCCURRED_DURING = 'OCCURRED_DURING',
   BEFORE = 'BEFORE',
   AFTER = 'AFTER',
   CONTEMPORARY_WITH = 'CONTEMPORARY_WITH',
-  
+
   // Relazioni culturali italiane
   CREATED = 'CREATED',
   PAINTED = 'PAINTED',
@@ -64,33 +64,33 @@ export enum ItalianPredicateType {
   COMPOSED = 'COMPOSED',
   DESIGNED = 'DESIGNED',
   BUILT = 'BUILT',
-  
+
   // Relazioni istituzionali
   MEMBER_OF = 'MEMBER_OF',
   PRESIDENT_OF = 'PRESIDENT_OF',
   MINISTER_OF = 'MINISTER_OF',
   MAYOR_OF = 'MAYOR_OF',
   GOVERNED = 'GOVERNED',
-  
+
   // Relazioni economiche
   OWNS = 'OWNS',
   PRODUCES = 'PRODUCES',
   EXPORTS = 'EXPORTS',
   IMPORTS = 'IMPORTS',
   COSTS = 'COSTS',
-  
+
   // Relazioni culturali specifiche
   PATRON_SAINT_OF = 'PATRON_SAINT_OF',
   CELEBRATES = 'CELEBRATES',
   TRADITIONAL_IN = 'TRADITIONAL_IN',
   DIALECT_OF = 'DIALECT_OF',
-  
+
   // Relazioni generiche
   IS_A = 'IS_A',
   HAS = 'HAS',
   CONTAINS = 'CONTAINS',
   ASSOCIATED_WITH = 'ASSOCIATED_WITH',
-  SIMILAR_TO = 'SIMILAR_TO'
+  SIMILAR_TO = 'SIMILAR_TO',
 }
 
 export interface TripleExtractionResult {

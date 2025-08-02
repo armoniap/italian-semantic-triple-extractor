@@ -2,7 +2,11 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
 import { ItalianEntity, EntityExtractionResult } from '@/types/entities';
-import { SemanticTriple, TripleExtractionResult, TripleAnalytics } from '@/types/triples';
+import {
+  SemanticTriple,
+  TripleExtractionResult,
+  TripleAnalytics,
+} from '@/types/triples';
 import { SecureStorage, UserPreferences } from '@/utils/storage';
 import { GeminiAPIService } from '@/services/geminiAPI';
 import { ItalianEntityExtractor } from '@/services/entityExtractor';
@@ -83,11 +87,14 @@ const useApplicationStore = create<ApplicationState>()(
       initializeServices: async (apiKey: string) => {
         try {
           const geminiService = new GeminiAPIService(apiKey);
-          
+
           // Validate API key
           const isValid = await geminiService.validateApiKey(apiKey);
           if (!isValid) {
-            set({ analysisError: 'Invalid API key. Please check your Gemini API key.' });
+            set({
+              analysisError:
+                'Invalid API key. Please check your Gemini API key.',
+            });
             return false;
           }
 
@@ -100,7 +107,7 @@ const useApplicationStore = create<ApplicationState>()(
             entityExtractor,
             tripleExtractor,
             isApiKeyValid: true,
-            analysisError: null
+            analysisError: null,
           });
 
           // Save API key securely
@@ -109,9 +116,9 @@ const useApplicationStore = create<ApplicationState>()(
           return true;
         } catch (error) {
           console.error('Failed to initialize services:', error);
-          set({ 
+          set({
             analysisError: 'Failed to initialize services. Please try again.',
-            isApiKeyValid: false 
+            isApiKeyValid: false,
           });
           return false;
         }
@@ -120,24 +127,27 @@ const useApplicationStore = create<ApplicationState>()(
       updatePreferences: (newPreferences: Partial<UserPreferences>) => {
         const currentPreferences = get().preferences;
         const updatedPreferences = { ...currentPreferences, ...newPreferences };
-        
+
         set({ preferences: updatedPreferences });
         SecureStorage.savePreferences(updatedPreferences);
       },
 
       analyzeText: async (text: string) => {
         const { entityExtractor, tripleExtractor, preferences } = get();
-        
+
         if (!entityExtractor || !tripleExtractor) {
-          set({ analysisError: 'Services not initialized. Please configure your API key.' });
+          set({
+            analysisError:
+              'Services not initialized. Please configure your API key.',
+          });
           return;
         }
 
-        set({ 
-          isAnalyzing: true, 
-          analysisProgress: 0, 
+        set({
+          isAnalyzing: true,
+          analysisProgress: 0,
           analysisError: null,
-          currentText: text 
+          currentText: text,
         });
 
         try {
@@ -148,7 +158,7 @@ const useApplicationStore = create<ApplicationState>()(
               entities: cachedResult.entities,
               triples: cachedResult.triples,
               isAnalyzing: false,
-              analysisProgress: 100
+              analysisProgress: 100,
             });
             return;
           }
@@ -156,30 +166,35 @@ const useApplicationStore = create<ApplicationState>()(
           // Extract entities
           set({ analysisProgress: 25 });
           const extractionResult = await entityExtractor.extractEntities(text);
-          
-          set({ 
+
+          set({
             entities: extractionResult.entities,
             extractionResult,
-            analysisProgress: 50 
+            analysisProgress: 50,
           });
 
           // Extract triples
           set({ analysisProgress: 75 });
-          const tripleResult = await tripleExtractor.extractTriples(text, extractionResult.entities);
-          
+          const tripleResult = await tripleExtractor.extractTriples(
+            text,
+            extractionResult.entities
+          );
+
           set({
             triples: tripleResult.triples,
             tripleResult,
-            analysisProgress: 90
+            analysisProgress: 90,
           });
 
           // Generate analytics
-          const analytics = tripleExtractor.generateAnalytics(tripleResult.triples);
-          
-          set({ 
+          const analytics = tripleExtractor.generateAnalytics(
+            tripleResult.triples
+          );
+
+          set({
             analytics,
             analysisProgress: 100,
-            isAnalyzing: false
+            isAnalyzing: false,
           });
 
           // Cache results
@@ -199,17 +214,20 @@ const useApplicationStore = create<ApplicationState>()(
               entitiesCount: extractionResult.entities.length,
               triplesCount: tripleResult.triples.length,
               confidence: extractionResult.confidence,
-              processingTime: extractionResult.processingTime + tripleResult.processingTime,
-              title: text.substring(0, 50) + (text.length > 50 ? '...' : '')
+              processingTime:
+                extractionResult.processingTime + tripleResult.processingTime,
+              title: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
             });
           }
-
         } catch (error) {
           console.error('Analysis failed:', error);
-          set({ 
-            analysisError: error instanceof Error ? error.message : 'Analysis failed. Please try again.',
+          set({
+            analysisError:
+              error instanceof Error
+                ? error.message
+                : 'Analysis failed. Please try again.',
             isAnalyzing: false,
-            analysisProgress: 0
+            analysisProgress: 0,
           });
         }
       },
@@ -225,7 +243,7 @@ const useApplicationStore = create<ApplicationState>()(
           selectedTriple: null,
           currentText: '',
           analysisError: null,
-          analysisProgress: 0
+          analysisProgress: 0,
         });
       },
 
@@ -251,18 +269,18 @@ const useApplicationStore = create<ApplicationState>()(
 
       setAnalysisError: (error: string | null) => {
         set({ analysisError: error });
-      }
+      },
     })),
     {
-      name: 'italian-triple-extractor-store'
+      name: 'italian-triple-extractor-store',
     }
   )
 );
 
 // Auto-initialize services if API key exists
 useApplicationStore.subscribe(
-  (state) => state.isApiKeyValid,
-  (isValid) => {
+  state => state.isApiKeyValid,
+  isValid => {
     if (!isValid) {
       const storedApiKey = SecureStorage.getApiKey();
       if (storedApiKey) {
@@ -274,9 +292,13 @@ useApplicationStore.subscribe(
 );
 
 // Context for React components
-const ApplicationContext = createContext<typeof useApplicationStore | null>(null);
+const ApplicationContext = createContext<typeof useApplicationStore | null>(
+  null
+);
 
-export const ApplicationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ApplicationProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   return (
     <ApplicationContext.Provider value={useApplicationStore}>
       {children}

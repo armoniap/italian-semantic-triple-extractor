@@ -1,27 +1,30 @@
 import React, { useState } from 'react';
-import { 
-  Key, 
-  Palette, 
-  Database, 
-  Download, 
-  Trash2, 
-  Eye, 
-  EyeOff, 
-  Check, 
+import {
+  Key,
+  Palette,
+  Database,
+  Download,
+  Trash2,
+  Eye,
+  EyeOff,
+  Check,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
 } from 'lucide-react';
 import { useApplication } from '@/store/ApplicationStore';
 import { SecureStorage } from '@/utils/storage';
 
 const SettingsPage: React.FC = () => {
-  const { preferences, updatePreferences, isApiKeyValid, initializeServices } = useApplication();
-  
+  const { preferences, updatePreferences, isApiKeyValid, initializeServices } =
+    useApplication();
+
   const [apiKey, setApiKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);
   const [isTestingApi, setIsTestingApi] = useState(false);
   const [apiTestResult, setApiTestResult] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'api' | 'preferences' | 'data'>('api');
+  const [activeTab, setActiveTab] = useState<'api' | 'preferences' | 'data'>(
+    'api'
+  );
 
   const handleApiKeySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +66,7 @@ const SettingsPage: React.FC = () => {
       link.download = 'italian-triple-extractor-data.json';
       link.click();
     } catch (error) {
-      alert('Errore durante l\'esportazione dei dati');
+      alert("Errore durante l'esportazione dei dati");
     }
   };
 
@@ -72,7 +75,7 @@ const SettingsPage: React.FC = () => {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = event => {
       try {
         const data = event.target?.result as string;
         const success = SecureStorage.importData(data);
@@ -80,7 +83,7 @@ const SettingsPage: React.FC = () => {
           alert('Dati importati con successo!');
           window.location.reload();
         } else {
-          alert('Errore durante l\'importazione dei dati');
+          alert("Errore durante l'importazione dei dati");
         }
       } catch (error) {
         alert('File non valido');
@@ -90,7 +93,11 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleClearAllData = () => {
-    if (confirm('ATTENZIONE: Questa azione eliminerà tutti i dati salvati (API key, preferenze, cronologia). Continuare?')) {
+    if (
+      confirm(
+        'ATTENZIONE: Questa azione eliminerà tutti i dati salvati (API key, preferenze, cronologia). Continuare?'
+      )
+    ) {
       SecureStorage.clearAllData();
       alert('Tutti i dati sono stati eliminati');
       window.location.reload();
@@ -102,7 +109,7 @@ const SettingsPage: React.FC = () => {
   const tabs = [
     { id: 'api' as const, label: 'API Key', icon: Key },
     { id: 'preferences' as const, label: 'Preferenze', icon: Palette },
-    { id: 'data' as const, label: 'Gestione Dati', icon: Database }
+    { id: 'data' as const, label: 'Gestione Dati', icon: Database },
   ];
 
   return (
@@ -143,11 +150,15 @@ const SettingsPage: React.FC = () => {
             {/* Current status */}
             <div className="mb-6 p-4 rounded-lg bg-gray-50">
               <div className="flex items-center">
-                <div className={`w-3 h-3 rounded-full mr-3 ${
-                  isApiKeyValid ? 'bg-green-500' : 'bg-red-500'
-                }`} />
+                <div
+                  className={`w-3 h-3 rounded-full mr-3 ${
+                    isApiKeyValid ? 'bg-green-500' : 'bg-red-500'
+                  }`}
+                />
                 <span className="font-medium">
-                  {isApiKeyValid ? 'API Key Configurata e Valida' : 'API Key Non Configurata'}
+                  {isApiKeyValid
+                    ? 'API Key Configurata e Valida'
+                    : 'API Key Non Configurata'}
                 </span>
               </div>
             </div>
@@ -155,7 +166,10 @@ const SettingsPage: React.FC = () => {
             {/* API Key form */}
             <form onSubmit={handleApiKeySubmit} className="space-y-4">
               <div>
-                <label htmlFor="api-key" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="api-key"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Google Gemini API Key
                 </label>
                 <div className="relative">
@@ -163,7 +177,7 @@ const SettingsPage: React.FC = () => {
                     type={showApiKey ? 'text' : 'password'}
                     id="api-key"
                     value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
+                    onChange={e => setApiKey(e.target.value)}
                     placeholder="Inserisci la tua API key di Google Gemini"
                     className="form-input pr-12"
                     disabled={isTestingApi}
@@ -173,7 +187,11 @@ const SettingsPage: React.FC = () => {
                     onClick={() => setShowApiKey(!showApiKey)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showApiKey ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -201,11 +219,13 @@ const SettingsPage: React.FC = () => {
 
             {/* Test result */}
             {apiTestResult && (
-              <div className={`mt-4 p-4 rounded-lg ${
-                apiTestResult === 'success' 
-                  ? 'bg-green-50 text-green-700 border border-green-200'
-                  : 'bg-red-50 text-red-700 border border-red-200'
-              }`}>
+              <div
+                className={`mt-4 p-4 rounded-lg ${
+                  apiTestResult === 'success'
+                    ? 'bg-green-50 text-green-700 border border-green-200'
+                    : 'bg-red-50 text-red-700 border border-red-200'
+                }`}
+              >
                 <div className="flex items-center">
                   {apiTestResult === 'success' ? (
                     <Check className="w-5 h-5 mr-2" />
@@ -213,10 +233,9 @@ const SettingsPage: React.FC = () => {
                     <AlertCircle className="w-5 h-5 mr-2" />
                   )}
                   <span>
-                    {apiTestResult === 'success' 
+                    {apiTestResult === 'success'
                       ? 'API key configurata correttamente!'
-                      : 'API key non valida. Verifica la chiave e riprova.'
-                    }
+                      : 'API key non valida. Verifica la chiave e riprova.'}
                   </span>
                 </div>
               </div>
@@ -227,15 +246,28 @@ const SettingsPage: React.FC = () => {
               <div className="flex items-start">
                 <HelpCircle className="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
                 <div className="text-sm text-blue-800">
-                  <p className="font-medium mb-2">Come ottenere una API key di Google Gemini:</p>
+                  <p className="font-medium mb-2">
+                    Come ottenere una API key di Google Gemini:
+                  </p>
                   <ol className="list-decimal list-inside space-y-1">
-                    <li>Vai su <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="underline">Google AI Studio</a></li>
+                    <li>
+                      Vai su{' '}
+                      <a
+                        href="https://ai.google.dev/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
+                        Google AI Studio
+                      </a>
+                    </li>
                     <li>Accedi con il tuo account Google</li>
                     <li>Clicca su "Get API Key" e crea una nuova chiave</li>
                     <li>Copia la chiave e incollala qui sopra</li>
                   </ol>
                   <p className="mt-2 text-xs">
-                    La tua API key viene salvata in modo sicuro nel browser e criptata.
+                    La tua API key viene salvata in modo sicuro nel browser e
+                    criptata.
                   </p>
                 </div>
               </div>
@@ -260,7 +292,11 @@ const SettingsPage: React.FC = () => {
                 </label>
                 <select
                   value={preferences.language}
-                  onChange={(e) => updatePreferences({ language: e.target.value as 'it' | 'en' })}
+                  onChange={e =>
+                    updatePreferences({
+                      language: e.target.value as 'it' | 'en',
+                    })
+                  }
                   className="form-input w-48"
                 >
                   <option value="it">Italiano</option>
@@ -275,7 +311,9 @@ const SettingsPage: React.FC = () => {
                 </label>
                 <select
                   value={preferences.theme}
-                  onChange={(e) => updatePreferences({ theme: e.target.value as any })}
+                  onChange={e =>
+                    updatePreferences({ theme: e.target.value as any })
+                  }
                   className="form-input w-48"
                 >
                   <option value="light">Chiaro</option>
@@ -287,7 +325,8 @@ const SettingsPage: React.FC = () => {
               {/* Confidence threshold */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Soglia Confidenza Minima: {Math.round(preferences.minConfidence * 100)}%
+                  Soglia Confidenza Minima:{' '}
+                  {Math.round(preferences.minConfidence * 100)}%
                 </label>
                 <input
                   type="range"
@@ -295,7 +334,11 @@ const SettingsPage: React.FC = () => {
                   max="1"
                   step="0.01"
                   value={preferences.minConfidence}
-                  onChange={(e) => updatePreferences({ minConfidence: parseFloat(e.target.value) })}
+                  onChange={e =>
+                    updatePreferences({
+                      minConfidence: parseFloat(e.target.value),
+                    })
+                  }
                   className="w-full"
                 />
                 <div className="text-xs text-gray-500 mt-1">
@@ -313,7 +356,9 @@ const SettingsPage: React.FC = () => {
                   min="10"
                   max="1000"
                   value={preferences.maxEntities}
-                  onChange={(e) => updatePreferences({ maxEntities: parseInt(e.target.value) })}
+                  onChange={e =>
+                    updatePreferences({ maxEntities: parseInt(e.target.value) })
+                  }
                   className="form-input w-24"
                 />
               </div>
@@ -325,7 +370,9 @@ const SettingsPage: React.FC = () => {
                 </label>
                 <select
                   value={preferences.exportFormat}
-                  onChange={(e) => updatePreferences({ exportFormat: e.target.value as any })}
+                  onChange={e =>
+                    updatePreferences({ exportFormat: e.target.value as any })
+                  }
                   className="form-input w-48"
                 >
                   <option value="json">JSON</option>
@@ -340,7 +387,9 @@ const SettingsPage: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={preferences.enableCache}
-                    onChange={(e) => updatePreferences({ enableCache: e.target.checked })}
+                    onChange={e =>
+                      updatePreferences({ enableCache: e.target.checked })
+                    }
                     className="rounded border-gray-300 text-italian-green focus:ring-italian-green"
                   />
                   <span className="ml-2 text-sm text-gray-700">
@@ -352,7 +401,9 @@ const SettingsPage: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={preferences.autoSave}
-                    onChange={(e) => updatePreferences({ autoSave: e.target.checked })}
+                    onChange={e =>
+                      updatePreferences({ autoSave: e.target.checked })
+                    }
                     className="rounded border-gray-300 text-italian-green focus:ring-italian-green"
                   />
                   <span className="ml-2 text-sm text-gray-700">
@@ -364,7 +415,9 @@ const SettingsPage: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={preferences.notifications}
-                    onChange={(e) => updatePreferences({ notifications: e.target.checked })}
+                    onChange={e =>
+                      updatePreferences({ notifications: e.target.checked })
+                    }
                     className="rounded border-gray-300 text-italian-green focus:ring-italian-green"
                   />
                   <span className="ml-2 text-sm text-gray-700">
@@ -385,7 +438,7 @@ const SettingsPage: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Utilizzo Storage
             </h2>
-            
+
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span>API Key:</span>
@@ -415,7 +468,7 @@ const SettingsPage: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               Gestione Dati
             </h2>
-            
+
             <div className="space-y-4">
               <div className="flex items-center justify-between py-3 border-b">
                 <div>
@@ -473,7 +526,9 @@ const SettingsPage: React.FC = () => {
 
               <div className="flex items-center justify-between py-3">
                 <div>
-                  <h3 className="font-medium text-gray-900 text-red-700">Elimina Tutti i Dati</h3>
+                  <h3 className="font-medium text-gray-900 text-red-700">
+                    Elimina Tutti i Dati
+                  </h3>
                   <p className="text-sm text-gray-600">
                     ATTENZIONE: Rimuove tutto (API key, preferenze, cronologia)
                   </p>

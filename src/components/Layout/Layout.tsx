@@ -1,14 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  Search, 
-  History, 
-  Settings, 
-  Menu,
-  X,
-  Globe
-} from 'lucide-react';
+import { Home, Search, History, Settings, Menu, X, Globe } from 'lucide-react';
 import { useApplication } from '@/store/ApplicationStore';
 
 interface LayoutProps {
@@ -34,18 +26,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="flex h-screen bg-gray-50">
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
           onClick={toggleSidebar}
         />
       )}
-      
+
       {/* Sidebar */}
-      <div className={`${
-        sidebarOpen ? 'w-64' : 'w-0'
-      } fixed lg:relative lg:translate-x-0 h-full z-50 lg:z-auto transition-all duration-300 overflow-hidden bg-white shadow-lg ${
-        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0`}>
+      <div
+        className={`${
+          sidebarOpen ? 'w-64' : 'w-0'
+        } fixed lg:relative lg:translate-x-0 h-full z-50 lg:z-auto transition-all duration-300 overflow-hidden bg-white shadow-lg ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0`}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
@@ -69,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* Navigation */}
           <nav className="flex-1 p-4">
             <ul className="space-y-2">
-              {navigation.map((item) => {
+              {navigation.map(item => {
                 const Icon = item.icon;
                 return (
                   <li key={item.name}>
@@ -93,9 +87,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {/* Status indicator */}
           <div className="p-4 border-t">
             <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${
-                isApiKeyValid ? 'bg-green-500' : 'bg-red-500'
-              }`} />
+              <div
+                className={`w-3 h-3 rounded-full ${
+                  isApiKeyValid ? 'bg-green-500' : 'bg-red-500'
+                }`}
+              />
               <span className="text-sm text-gray-600">
                 {isApiKeyValid ? 'API Connessa' : 'API Non Configurata'}
               </span>
@@ -120,7 +116,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 <Menu className="w-5 h-5" />
               </button>
-              
+
               {!sidebarOpen && (
                 <button
                   onClick={toggleSidebar}
@@ -130,13 +126,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <Menu className="w-5 h-5" />
                 </button>
               )}
-              
+
               <h2 className="text-lg lg:text-xl font-semibold text-gray-900 truncate">
                 <span className="hidden sm:inline">
-                  {navigation.find(item => isActive(item.href))?.name || 'Italian Semantic Triple Extractor'}
+                  {navigation.find(item => isActive(item.href))?.name ||
+                    'Italian Semantic Triple Extractor'}
                 </span>
                 <span className="sm:hidden">
-                  {navigation.find(item => isActive(item.href))?.name || 'Triple Extractor'}
+                  {navigation.find(item => isActive(item.href))?.name ||
+                    'Triple Extractor'}
                 </span>
               </h2>
             </div>
@@ -152,7 +150,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <span className="sm:hidden">API</span>
                 </Link>
               )}
-              
+
               {/* Italian flag indicator */}
               <div className="hidden sm:flex items-center space-x-1 text-xs text-gray-500">
                 <span className="italian-wave">🇮🇹</span>

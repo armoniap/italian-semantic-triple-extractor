@@ -22,7 +22,7 @@ export enum ItalianEntityType {
   ARTIST = 'ARTIST',
   WRITER = 'WRITER',
   SCIENTIST = 'SCIENTIST',
-  
+
   // Organizzazioni
   ORGANIZATION = 'ORGANIZATION',
   COMPANY = 'COMPANY',
@@ -30,7 +30,7 @@ export enum ItalianEntityType {
   POLITICAL_PARTY = 'POLITICAL_PARTY',
   UNIVERSITY = 'UNIVERSITY',
   MUSEUM = 'MUSEUM',
-  
+
   // Luoghi italiani
   LOCATION = 'LOCATION',
   ITALIAN_CITY = 'ITALIAN_CITY',
@@ -39,31 +39,31 @@ export enum ItalianEntityType {
   MONUMENT = 'MONUMENT',
   LANDMARK = 'LANDMARK',
   PIAZZA = 'PIAZZA',
-  
+
   // Tempo
   DATE = 'DATE',
   TIME = 'TIME',
   PERIOD = 'PERIOD',
   ITALIAN_HOLIDAY = 'ITALIAN_HOLIDAY',
   HISTORICAL_EVENT = 'HISTORICAL_EVENT',
-  
+
   // Valori
   MONETARY = 'MONETARY',
   PERCENTAGE = 'PERCENTAGE',
   NUMBER = 'NUMBER',
-  
+
   // Eventi e cultura italiana
   CULTURAL_EVENT = 'CULTURAL_EVENT',
   FESTIVAL = 'FESTIVAL',
   TRADITION = 'TRADITION',
   CUISINE = 'CUISINE',
-  
+
   // Prodotti e brand italiani
   ITALIAN_BRAND = 'ITALIAN_BRAND',
   ITALIAN_PRODUCT = 'ITALIAN_PRODUCT',
-  
+
   // Altro
-  MISCELLANEOUS = 'MISCELLANEOUS'
+  MISCELLANEOUS = 'MISCELLANEOUS',
 }
 
 export interface ItalianEntityMetadata {
@@ -74,22 +74,22 @@ export interface ItalianEntityMetadata {
   };
   region?: string;
   province?: string;
-  
+
   // Dati temporali
   startDate?: string;
   endDate?: string;
-  
+
   // Dati culturali
   culturalContext?: string;
   historicalPeriod?: string;
-  
+
   // Collegamenti
   relatedEntities?: string[];
-  
+
   // Metadata linguistici
   dialectalVariants?: string[];
   synonyms?: string[];
-  
+
   // Valutazione
   relevanceScore?: number;
   popularityScore?: number;

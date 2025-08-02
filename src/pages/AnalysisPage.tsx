@@ -16,7 +16,7 @@ const AnalysisPage: React.FC = () => {
     highlightMode,
     toggleHighlightMode,
     activeView,
-    setAnalysisError
+    setAnalysisError,
   } = useApplication();
 
   const hasResults = entities.length > 0 || triples.length > 0;
@@ -33,8 +33,8 @@ const AnalysisPage: React.FC = () => {
               </h3>
               <div className="mt-2 text-red-700">
                 <p>
-                  Per utilizzare il sistema di analisi è necessario configurare una API key 
-                  di Google Gemini nelle impostazioni.
+                  Per utilizzare il sistema di analisi è necessario configurare
+                  una API key di Google Gemini nelle impostazioni.
                 </p>
                 <div className="mt-4">
                   <a
@@ -60,7 +60,9 @@ const AnalysisPage: React.FC = () => {
           <div className="flex">
             <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">Errore di Analisi</h3>
+              <h3 className="text-sm font-medium text-red-800">
+                Errore di Analisi
+              </h3>
               <div className="mt-1 text-sm text-red-700">{analysisError}</div>
               <div className="mt-3">
                 <button
@@ -79,7 +81,7 @@ const AnalysisPage: React.FC = () => {
         {/* Left Column - Input */}
         <div className="space-y-6">
           <InputSection />
-          
+
           {/* Text with entity highlighting */}
           {currentText && hasResults && (
             <div className="bg-white rounded-lg border p-6">
@@ -91,11 +93,17 @@ const AnalysisPage: React.FC = () => {
                   onClick={toggleHighlightMode}
                   className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-800"
                 >
-                  {highlightMode ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  <span>{highlightMode ? 'Nascondi' : 'Mostra'} Evidenziature</span>
+                  {highlightMode ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                  <span>
+                    {highlightMode ? 'Nascondi' : 'Mostra'} Evidenziature
+                  </span>
                 </button>
               </div>
-              
+
               <div className="max-h-96 overflow-y-auto custom-scrollbar">
                 <EntityHighlighter
                   text={currentText}
@@ -110,7 +118,7 @@ const AnalysisPage: React.FC = () => {
         {/* Right Column - Results */}
         <div className="space-y-6">
           <OutputSection />
-          
+
           {/* Graph visualization for triples */}
           {activeView === 'triples' && triples.length > 0 && (
             <div className="bg-white rounded-lg border p-6">
@@ -126,22 +134,26 @@ const AnalysisPage: React.FC = () => {
           {/* Quick stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white p-4 rounded-lg border text-center">
-              <div className="text-2xl font-bold text-blue-600">{entities.length}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {entities.length}
+              </div>
               <div className="text-sm text-gray-600">Entità Estratte</div>
             </div>
-            
+
             <div className="bg-white p-4 rounded-lg border text-center">
-              <div className="text-2xl font-bold text-green-600">{triples.length}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {triples.length}
+              </div>
               <div className="text-sm text-gray-600">Triple Semantiche</div>
             </div>
-            
+
             <div className="bg-white p-4 rounded-lg border text-center">
               <div className="text-2xl font-bold text-purple-600">
                 {new Set([...entities.map(e => e.type)]).size}
               </div>
               <div className="text-sm text-gray-600">Tipi di Entità</div>
             </div>
-            
+
             <div className="bg-white p-4 rounded-lg border text-center">
               <div className="text-2xl font-bold text-orange-600">
                 {new Set([...triples.map(t => t.predicate.type)]).size}

@@ -34,17 +34,17 @@ export class GeminiAPIService {
       maxTokensPerRequest: 32768,
       retryAttempts: 3,
       baseDelayMs: 1000,
-      ...rateLimitConfig
+      ...rateLimitConfig,
     };
-    
+
     this.quotaStatus = {
       requestsUsed: 0,
       requestsLimit: 1000,
       tokensUsed: 0,
       tokensLimit: 1000000,
-      resetTime: Date.now() + 24 * 60 * 60 * 1000
+      resetTime: Date.now() + 24 * 60 * 60 * 1000,
     };
-    
+
     if (apiKey) {
       this.initialize(apiKey);
     }
@@ -53,22 +53,24 @@ export class GeminiAPIService {
   initialize(apiKey: string): void {
     try {
       this.genAI = new GoogleGenerativeAI(apiKey);
-      
+
       // Configure model with Italian-optimized settings
       const generationConfig: GenerationConfig = {
         temperature: 0.3, // Lower temperature for more precise entity extraction
         topK: 40,
         topP: 0.95,
         maxOutputTokens: 8192,
-        candidateCount: 1
+        candidateCount: 1,
       };
-      
-      this.model = this.genAI.getGenerativeModel({ 
+
+      this.model = this.genAI.getGenerativeModel({
         model: 'gemini-1.5-pro-latest',
-        generationConfig
+        generationConfig,
       });
-      
-      console.log('Gemini API initialized successfully for Italian text processing');
+
+      console.log(
+        'Gemini API initialized successfully for Italian text processing'
+      );
     } catch (error) {
       console.error('Failed to initialize Gemini API:', error);
       throw new Error('Invalid API key or initialization failed');
@@ -85,7 +87,9 @@ export class GeminiAPIService {
     chunkSize: number = 4000
   ): Promise<any> {
     if (!this.isInitialized()) {
-      throw new Error('Gemini API not initialized. Please provide a valid API key.');
+      throw new Error(
+        'Gemini API not initialized. Please provide a valid API key.'
+      );
     }
 
     // Check text length and chunk if necessary
@@ -97,25 +101,30 @@ export class GeminiAPIService {
 
     return this.withRetry(async () => {
       await this.enforceRateLimit();
-      
+
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
-      
+
       // Check for safety issues
       if (response.promptFeedback?.blockReason) {
-        throw new Error(`Content blocked: ${response.promptFeedback.blockReason}`);
+        throw new Error(
+          `Content blocked: ${response.promptFeedback.blockReason}`
+        );
       }
-      
+
       const analysisResult = response.text();
       this.updateQuotaStatus(prompt, analysisResult);
-      
+
       return this.parseAnalysisResponse(analysisResult, analysisType);
     });
   }
 
-  private buildItalianAnalysisPrompt(text: string, analysisType: string): string {
+  private buildItalianAnalysisPrompt(
+    text: string,
+    analysisType: string
+  ): string {
     const italianContext = this.getItalianContextualInstructions();
-    
+
     const basePrompt = `Sei un esperto analista di testo semantico specializzato nella lingua e cultura italiana.
 
 CONTESTO CULTURALE ITALIANO:
@@ -144,7 +153,11 @@ FORMATO OUTPUT: JSON strutturato valido con encoding UTF-8 per caratteri italian
     } else if (analysisType === 'triples') {
       return basePrompt + this.getAdvancedTripleExtractionInstructions();
     } else {
-      return basePrompt + this.getAdvancedEntityExtractionInstructions() + this.getAdvancedTripleExtractionInstructions();
+      return (
+        basePrompt +
+        this.getAdvancedEntityExtractionInstructions() +
+        this.getAdvancedTripleExtractionInstructions()
+      );
     }
   }
 
@@ -230,22 +243,30 @@ ESEMPI DI PATTERN ITALIANI:
 - Brand italiani: Ferrari, Fiat, Alfa Romeo, Armani, Versace, Prada, Dolce & Gabbana, Ferragamo`;
   }
 
-  private async analyzeTextInChunks(text: string, analysisType: 'entities' | 'triples' | 'both', chunkSize: number): Promise<any> {
+  private async analyzeTextInChunks(
+    text: string,
+    analysisType: 'entities' | 'triples' | 'both',
+    chunkSize: number
+  ): Promise<any> {
     const chunks = this.splitTextIntoChunks(text, chunkSize);
     const results = [];
 
     for (const chunk of chunks) {
-      const result = await this.analyzeItalianText(chunk.text, analysisType, chunkSize);
-      
+      const result = await this.analyzeItalianText(
+        chunk.text,
+        analysisType,
+        chunkSize
+      );
+
       // Adjust offsets based on chunk position
       if (result.entities) {
         result.entities = result.entities.map((entity: any) => ({
           ...entity,
           startOffset: entity.startOffset + chunk.offset,
-          endOffset: entity.endOffset + chunk.offset
+          endOffset: entity.endOffset + chunk.offset,
         }));
       }
-      
+
       results.push(result);
     }
 
@@ -253,13 +274,16 @@ ESEMPI DI PATTERN ITALIANI:
     return this.mergeChunkResults(results, analysisType);
   }
 
-  private splitTextIntoChunks(text: string, chunkSize: number): Array<{text: string, offset: number}> {
+  private splitTextIntoChunks(
+    text: string,
+    chunkSize: number
+  ): Array<{ text: string; offset: number }> {
     const chunks = [];
     let offset = 0;
 
     while (offset < text.length) {
       let endOffset = Math.min(offset + chunkSize, text.length);
-      
+
       // Try to break at sentence boundaries
       if (endOffset < text.length) {
         const lastSentenceEnd = text.lastIndexOf('.', endOffset);
@@ -270,7 +294,7 @@ ESEMPI DI PATTERN ITALIANI:
 
       chunks.push({
         text: text.substring(offset, endOffset),
-        offset: offset
+        offset: offset,
       });
 
       offset = endOffset;
@@ -310,7 +334,7 @@ ESEMPI DI PATTERN ITALIANI:
   private updateQuotaStatus(prompt: string, response: string): void {
     const promptTokens = Math.ceil(prompt.length / 4); // Rough estimation
     const responseTokens = Math.ceil(response.length / 4);
-    
+
     this.quotaStatus.requestsUsed++;
     this.quotaStatus.tokensUsed += promptTokens + responseTokens;
 
@@ -330,33 +354,33 @@ ESEMPI DI PATTERN ITALIANI:
     try {
       // Remove markdown formatting if present
       let cleanResponse = response.replace(/```json\n?|\n?```/g, '');
-      
+
       // Remove any text before the JSON
       const jsonStart = cleanResponse.indexOf('{');
       if (jsonStart > 0) {
         cleanResponse = cleanResponse.substring(jsonStart);
       }
-      
+
       // Remove any text after the JSON
       const jsonEnd = cleanResponse.lastIndexOf('}');
       if (jsonEnd !== -1) {
         cleanResponse = cleanResponse.substring(0, jsonEnd + 1);
       }
-      
+
       const parsed = JSON.parse(cleanResponse);
-      
+
       // Validate and clean the response
       return this.validateAndCleanResponse(parsed, analysisType);
     } catch (error) {
       console.error('Failed to parse Gemini response:', error);
       console.log('Raw response:', response);
-      
+
       // Try to extract partial data
       const partialData = this.extractPartialData(response, analysisType);
       if (partialData) {
         return partialData;
       }
-      
+
       // Return empty structure based on analysis type
       if (analysisType === 'entities') {
         return { entities: [] };
@@ -371,52 +395,69 @@ ESEMPI DI PATTERN ITALIANI:
   private validateAndCleanResponse(response: any, analysisType: string): any {
     const cleaned: any = {};
 
-    if ((analysisType === 'entities' || analysisType === 'both') && response.entities) {
-      cleaned.entities = response.entities.filter((entity: any) => 
-        entity.text && 
-        entity.type && 
-        typeof entity.confidence === 'number' &&
-        entity.confidence >= 0.6 // Minimum confidence threshold
+    if (
+      (analysisType === 'entities' || analysisType === 'both') &&
+      response.entities
+    ) {
+      cleaned.entities = response.entities.filter(
+        (entity: any) =>
+          entity.text &&
+          entity.type &&
+          typeof entity.confidence === 'number' &&
+          entity.confidence >= 0.6 // Minimum confidence threshold
       );
     }
 
-    if ((analysisType === 'triples' || analysisType === 'both') && response.triples) {
-      cleaned.triples = response.triples.filter((triple: any) => 
-        triple.subject && 
-        triple.predicate && 
-        triple.object &&
-        typeof triple.confidence === 'number' &&
-        triple.confidence >= 0.6 // Minimum confidence threshold
+    if (
+      (analysisType === 'triples' || analysisType === 'both') &&
+      response.triples
+    ) {
+      cleaned.triples = response.triples.filter(
+        (triple: any) =>
+          triple.subject &&
+          triple.predicate &&
+          triple.object &&
+          typeof triple.confidence === 'number' &&
+          triple.confidence >= 0.6 // Minimum confidence threshold
       );
     }
 
     return cleaned;
   }
 
-  private extractPartialData(response: string, analysisType: string): any | null {
+  private extractPartialData(
+    response: string,
+    analysisType: string
+  ): any | null {
     try {
       // Try to extract entities using regex
       const entityMatches = response.match(/"entities":\s*\[(.*?)\]/s);
       const tripleMatches = response.match(/"triples":\s*\[(.*?)\]/s);
-      
+
       const result: any = {};
-      
-      if (entityMatches && (analysisType === 'entities' || analysisType === 'both')) {
+
+      if (
+        entityMatches &&
+        (analysisType === 'entities' || analysisType === 'both')
+      ) {
         try {
           result.entities = JSON.parse(`[${entityMatches[1]}]`);
         } catch {
           result.entities = [];
         }
       }
-      
-      if (tripleMatches && (analysisType === 'triples' || analysisType === 'both')) {
+
+      if (
+        tripleMatches &&
+        (analysisType === 'triples' || analysisType === 'both')
+      ) {
         try {
           result.triples = JSON.parse(`[${tripleMatches[1]}]`);
         } catch {
           result.triples = [];
         }
       }
-      
+
       return Object.keys(result).length > 0 ? result : null;
     } catch {
       return null;
@@ -427,10 +468,10 @@ ESEMPI DI PATTERN ITALIANI:
     try {
       const tempGenAI = new GoogleGenerativeAI(apiKey);
       const tempModel = tempGenAI.getGenerativeModel({ model: 'gemini-pro' });
-      
+
       const result = await tempModel.generateContent('Test');
       await result.response;
-      
+
       return true;
     } catch (error) {
       console.error('API key validation failed:', error);
@@ -451,13 +492,13 @@ ESEMPI DI PATTERN ITALIANI:
         if (attempt === maxRetries) {
           throw error;
         }
-        
+
         console.warn(`Attempt ${attempt} failed, retrying in ${delayMs}ms...`);
         await new Promise(resolve => setTimeout(resolve, delayMs));
         delayMs *= 2; // Exponential backoff
       }
     }
-    
+
     throw new Error('All retry attempts failed');
   }
 }

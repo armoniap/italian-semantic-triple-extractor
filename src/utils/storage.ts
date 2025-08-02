@@ -15,7 +15,7 @@ export const STORAGE_KEYS: StorageKeys = {
   GEMINI_API_KEY: 'gemini_api_key',
   USER_PREFERENCES: 'user_preferences',
   ANALYSIS_HISTORY: 'analysis_history',
-  CACHED_RESULTS: 'cached_results'
+  CACHED_RESULTS: 'cached_results',
 };
 
 export interface UserPreferences {
@@ -65,24 +65,24 @@ export class SecureStorage {
       if (!this.validateApiKeyFormat(apiKey)) {
         throw new Error('Invalid API key format');
       }
-      
+
       // Create a more secure encryption with timestamp
       const keyData = {
         key: apiKey,
         timestamp: Date.now(),
-        version: '2.0'
+        version: '2.0',
       };
-      
+
       const encrypted = CryptoJS.AES.encrypt(
-        JSON.stringify(keyData), 
+        JSON.stringify(keyData),
         this.ENCRYPTION_KEY + navigator.userAgent.slice(0, 20)
       ).toString();
-      
+
       localStorage.setItem(STORAGE_KEYS.GEMINI_API_KEY, encrypted);
-      
+
       // Log access for security monitoring (without exposing the key)
       this.logSecurityEvent('API_KEY_SAVED', { timestamp: Date.now() });
-      
+
       return true;
     } catch (error) {
       console.error('Failed to save API key:', error);
@@ -96,19 +96,20 @@ export class SecureStorage {
       if (!encrypted) return null;
 
       const decrypted = CryptoJS.AES.decrypt(
-        encrypted, 
+        encrypted,
         this.ENCRYPTION_KEY + navigator.userAgent.slice(0, 20)
       );
-      
+
       const decryptedString = decrypted.toString(CryptoJS.enc.Utf8);
-      
+
       // Handle both old and new format
       try {
         const keyData = JSON.parse(decryptedString);
         if (keyData.key && keyData.timestamp) {
           // Check if key is not too old (security measure)
           const keyAge = Date.now() - keyData.timestamp;
-          if (keyAge > 90 * 24 * 60 * 60 * 1000) { // 90 days
+          if (keyAge > 90 * 24 * 60 * 60 * 1000) {
+            // 90 days
             console.warn('API key is older than 90 days, consider refreshing');
           }
           return keyData.key;
@@ -117,11 +118,13 @@ export class SecureStorage {
         // Fallback to old format
         return decryptedString;
       }
-      
+
       return null;
     } catch (error) {
       console.error('Failed to decrypt API key:', error);
-      this.logSecurityEvent('API_KEY_DECRYPT_FAILED', { timestamp: Date.now() });
+      this.logSecurityEvent('API_KEY_DECRYPT_FAILED', {
+        timestamp: Date.now(),
+      });
       return null;
     }
   }
@@ -139,9 +142,9 @@ export class SecureStorage {
     try {
       const currentPrefs = this.getPreferences();
       const updatedPrefs = { ...currentPrefs, ...preferences };
-      
+
       localStorage.setItem(
-        STORAGE_KEYS.USER_PREFERENCES, 
+        STORAGE_KEYS.USER_PREFERENCES,
         JSON.stringify(updatedPrefs)
       );
       return true;
@@ -173,19 +176,21 @@ export class SecureStorage {
       enableCache: true,
       autoSave: true,
       exportFormat: 'json',
-      notifications: true
+      notifications: true,
     };
   }
 
   // Analysis history
-  static saveAnalysisHistory(item: Omit<AnalysisHistoryItem, 'id' | 'timestamp'>): boolean {
+  static saveAnalysisHistory(
+    item: Omit<AnalysisHistoryItem, 'id' | 'timestamp'>
+  ): boolean {
     try {
       const history = this.getAnalysisHistory();
-      
+
       const newItem: AnalysisHistoryItem = {
         ...item,
         id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       history.unshift(newItem);
@@ -195,7 +200,10 @@ export class SecureStorage {
         history.splice(this.MAX_HISTORY_ITEMS);
       }
 
-      localStorage.setItem(STORAGE_KEYS.ANALYSIS_HISTORY, JSON.stringify(history));
+      localStorage.setItem(
+        STORAGE_KEYS.ANALYSIS_HISTORY,
+        JSON.stringify(history)
+      );
       return true;
     } catch (error) {
       console.error('Failed to save analysis history:', error);
@@ -219,9 +227,9 @@ export class SecureStorage {
 
   // Enhanced results caching with compression and Italian-specific optimizations
   static cacheResult(
-    text: string, 
-    entities: any[], 
-    triples: any[], 
+    text: string,
+    entities: any[],
+    triples: any[],
     confidence: number,
     metadata?: { language?: string; processingTime?: number }
   ): boolean {
@@ -246,8 +254,8 @@ export class SecureStorage {
           processingTime: metadata?.processingTime,
           entityCount: entities.length,
           tripleCount: triples.length,
-          textLength: text.length
-        }
+          textLength: text.length,
+        },
       };
 
       // Compress if data is large
@@ -263,7 +271,10 @@ export class SecureStorage {
       // Intelligent cache size management
       this.manageItalianCacheSize(filteredCache);
 
-      localStorage.setItem(STORAGE_KEYS.CACHED_RESULTS, JSON.stringify(filteredCache));
+      localStorage.setItem(
+        STORAGE_KEYS.CACHED_RESULTS,
+        JSON.stringify(filteredCache)
+      );
       return true;
     } catch (error) {
       console.error('Failed to cache result:', error);
@@ -279,18 +290,17 @@ export class SecureStorage {
       const textHash = this.hashText(text);
       const cache = this.getCachedResults();
 
-      const cachedItem = cache.find(item => 
-        item.textHash === textHash && 
-        item.expiresAt > Date.now()
+      const cachedItem = cache.find(
+        item => item.textHash === textHash && item.expiresAt > Date.now()
       );
 
       if (cachedItem) {
         // Decompress if necessary
         const decompressed = this.decompressData(cachedItem);
-        
+
         // Update access time for LRU management
         this.updateCacheAccessTime(textHash);
-        
+
         return decompressed;
       }
 
@@ -307,13 +317,18 @@ export class SecureStorage {
       if (!stored) return [];
 
       const cache = JSON.parse(stored);
-      
+
       // Filter out expired items
-      const validCache = cache.filter((item: CachedResult) => item.expiresAt > Date.now());
-      
+      const validCache = cache.filter(
+        (item: CachedResult) => item.expiresAt > Date.now()
+      );
+
       // Update storage if we removed expired items
       if (validCache.length !== cache.length) {
-        localStorage.setItem(STORAGE_KEYS.CACHED_RESULTS, JSON.stringify(validCache));
+        localStorage.setItem(
+          STORAGE_KEYS.CACHED_RESULTS,
+          JSON.stringify(validCache)
+        );
       }
 
       return validCache;
@@ -348,12 +363,12 @@ export class SecureStorage {
       apiKey: getSize(STORAGE_KEYS.GEMINI_API_KEY),
       preferences: getSize(STORAGE_KEYS.USER_PREFERENCES),
       history: getSize(STORAGE_KEYS.ANALYSIS_HISTORY),
-      cache: getSize(STORAGE_KEYS.CACHED_RESULTS)
+      cache: getSize(STORAGE_KEYS.CACHED_RESULTS),
     };
 
     return {
       ...usage,
-      total: Object.values(usage).reduce((sum, size) => sum + size, 0)
+      total: Object.values(usage).reduce((sum, size) => sum + size, 0),
     };
   }
 
@@ -370,7 +385,7 @@ export class SecureStorage {
       history: this.getAnalysisHistory(),
       cache: this.getCachedResults(),
       exportedAt: new Date().toISOString(),
-      version: '1.0.0'
+      version: '1.0.0',
     };
 
     return JSON.stringify(data, null, 2);
@@ -379,17 +394,23 @@ export class SecureStorage {
   static importData(jsonData: string): boolean {
     try {
       const data = JSON.parse(jsonData);
-      
+
       if (data.preferences) {
         this.savePreferences(data.preferences);
       }
-      
+
       if (data.history && Array.isArray(data.history)) {
-        localStorage.setItem(STORAGE_KEYS.ANALYSIS_HISTORY, JSON.stringify(data.history));
+        localStorage.setItem(
+          STORAGE_KEYS.ANALYSIS_HISTORY,
+          JSON.stringify(data.history)
+        );
       }
-      
+
       if (data.cache && Array.isArray(data.cache)) {
-        localStorage.setItem(STORAGE_KEYS.CACHED_RESULTS, JSON.stringify(data.cache));
+        localStorage.setItem(
+          STORAGE_KEYS.CACHED_RESULTS,
+          JSON.stringify(data.cache)
+        );
       }
 
       return true;
@@ -411,18 +432,18 @@ export class SecureStorage {
       event,
       timestamp: Date.now(),
       userAgent: navigator.userAgent.slice(0, 50),
-      ...data
+      ...data,
     };
-    
+
     // Store in a separate security log (limited size)
     const securityLog = this.getSecurityLog();
     securityLog.unshift(logEntry);
-    
+
     // Keep only last 50 security events
     if (securityLog.length > 50) {
       securityLog.splice(50);
     }
-    
+
     localStorage.setItem('security_log', JSON.stringify(securityLog));
   }
 
@@ -443,11 +464,13 @@ export class SecureStorage {
       confidence: Math.round(entity.confidence * 100) / 100, // Round to 2 decimals
       startOffset: entity.startOffset,
       endOffset: entity.endOffset,
-      metadata: entity.metadata ? {
-        region: entity.metadata.region,
-        culturalContext: entity.metadata.culturalContext,
-        coordinates: entity.metadata.coordinates
-      } : undefined
+      metadata: entity.metadata
+        ? {
+            region: entity.metadata.region,
+            culturalContext: entity.metadata.culturalContext,
+            coordinates: entity.metadata.coordinates,
+          }
+        : undefined,
     }));
   }
 
@@ -458,7 +481,7 @@ export class SecureStorage {
       predicate: triple.predicate,
       object: triple.object,
       confidence: Math.round(triple.confidence * 100) / 100,
-      context: triple.context?.slice(0, 200) // Limit context length
+      context: triple.context?.slice(0, 200), // Limit context length
     }));
   }
 
@@ -470,7 +493,7 @@ export class SecureStorage {
       const compressed = {
         ...data,
         _compressed: true,
-        _originalSize: jsonString.length
+        _originalSize: jsonString.length,
       };
       return compressed;
     } catch {
@@ -496,10 +519,10 @@ export class SecureStorage {
     cache.sort((a, b) => {
       const aItalian = this.isItalianCulturalContent(a);
       const bItalian = this.isItalianCulturalContent(b);
-      
+
       if (aItalian && !bItalian) return -1;
       if (!aItalian && bItalian) return 1;
-      
+
       // If both are Italian or both are not, sort by timestamp
       return b.timestamp - a.timestamp;
     });
@@ -510,17 +533,18 @@ export class SecureStorage {
 
   private static isItalianCulturalContent(cacheItem: any): boolean {
     if (!cacheItem.metadata) return false;
-    
-    const hasItalianEntities = cacheItem.entities?.some((entity: any) => 
-      entity.type?.includes('ITALIAN_') || 
-      entity.metadata?.region ||
-      entity.metadata?.culturalContext?.includes('italian')
+
+    const hasItalianEntities = cacheItem.entities?.some(
+      (entity: any) =>
+        entity.type?.includes('ITALIAN_') ||
+        entity.metadata?.region ||
+        entity.metadata?.culturalContext?.includes('italian')
     );
-    
+
     const hasItalianTriples = cacheItem.triples?.some((triple: any) =>
       triple.context?.match(/\b(italia|romano|italiana|italiano)\b/i)
     );
-    
+
     return hasItalianEntities || hasItalianTriples;
   }
 
@@ -530,7 +554,10 @@ export class SecureStorage {
       const item = cache.find(c => c.textHash === textHash);
       if (item) {
         item.lastAccessed = Date.now();
-        localStorage.setItem(STORAGE_KEYS.CACHED_RESULTS, JSON.stringify(cache));
+        localStorage.setItem(
+          STORAGE_KEYS.CACHED_RESULTS,
+          JSON.stringify(cache)
+        );
       }
     } catch (error) {
       console.error('Failed to update cache access time:', error);
@@ -548,7 +575,7 @@ export class SecureStorage {
   ): boolean {
     try {
       const history = this.getAnalysisHistory();
-      
+
       const newItem: AnalysisHistoryItem & { italianMetrics?: any } = {
         ...item,
         id: `analysis_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -557,8 +584,8 @@ export class SecureStorage {
           italianEntitiesCount: item.italianEntitiesCount || 0,
           culturalRelevanceScore: item.culturalRelevanceScore || 0,
           geographicEntitiesCount: item.geographicEntitiesCount || 0,
-          historicalEntitiesCount: item.historicalEntitiesCount || 0
-        }
+          historicalEntitiesCount: item.historicalEntitiesCount || 0,
+        },
       };
 
       history.unshift(newItem);
@@ -568,7 +595,10 @@ export class SecureStorage {
         history.splice(this.MAX_HISTORY_ITEMS);
       }
 
-      localStorage.setItem(STORAGE_KEYS.ANALYSIS_HISTORY, JSON.stringify(history));
+      localStorage.setItem(
+        STORAGE_KEYS.ANALYSIS_HISTORY,
+        JSON.stringify(history)
+      );
       return true;
     } catch (error) {
       console.error('Failed to save enhanced analysis history:', error);
@@ -586,31 +616,43 @@ export class SecureStorage {
   } {
     try {
       const history = this.getAnalysisHistory();
-      const italianAnalyses = history.filter((item: any) => item.italianMetrics);
-      
+      const italianAnalyses = history.filter(
+        (item: any) => item.italianMetrics
+      );
+
       if (italianAnalyses.length === 0) {
         return {
           totalAnalyses: 0,
           averageItalianEntities: 0,
           averageCulturalRelevance: 0,
           mostAnalyzedRegions: [],
-          processingTimeStats: { avg: 0, min: 0, max: 0 }
+          processingTimeStats: { avg: 0, min: 0, max: 0 },
         };
       }
 
-      const avgItalianEntities = italianAnalyses.reduce((sum: number, item: any) => 
-        sum + (item.italianMetrics?.italianEntitiesCount || 0), 0
-      ) / italianAnalyses.length;
+      const avgItalianEntities =
+        italianAnalyses.reduce(
+          (sum: number, item: any) =>
+            sum + (item.italianMetrics?.italianEntitiesCount || 0),
+          0
+        ) / italianAnalyses.length;
 
-      const avgCulturalRelevance = italianAnalyses.reduce((sum: number, item: any) => 
-        sum + (item.italianMetrics?.culturalRelevanceScore || 0), 0
-      ) / italianAnalyses.length;
+      const avgCulturalRelevance =
+        italianAnalyses.reduce(
+          (sum: number, item: any) =>
+            sum + (item.italianMetrics?.culturalRelevanceScore || 0),
+          0
+        ) / italianAnalyses.length;
 
-      const processingTimes = italianAnalyses.map((item: any) => item.processingTime).filter(Boolean);
+      const processingTimes = italianAnalyses
+        .map((item: any) => item.processingTime)
+        .filter(Boolean);
       const processingTimeStats = {
-        avg: processingTimes.reduce((sum, time) => sum + time, 0) / processingTimes.length,
+        avg:
+          processingTimes.reduce((sum, time) => sum + time, 0) /
+          processingTimes.length,
         min: Math.min(...processingTimes),
-        max: Math.max(...processingTimes)
+        max: Math.max(...processingTimes),
       };
 
       return {
@@ -618,7 +660,7 @@ export class SecureStorage {
         averageItalianEntities: Math.round(avgItalianEntities * 100) / 100,
         averageCulturalRelevance: Math.round(avgCulturalRelevance * 100) / 100,
         mostAnalyzedRegions: [], // Could be enhanced with actual region tracking
-        processingTimeStats
+        processingTimeStats,
       };
     } catch (error) {
       console.error('Failed to get Italian content analytics:', error);
@@ -627,7 +669,7 @@ export class SecureStorage {
         averageItalianEntities: 0,
         averageCulturalRelevance: 0,
         mostAnalyzedRegions: [],
-        processingTimeStats: { avg: 0, min: 0, max: 0 }
+        processingTimeStats: { avg: 0, min: 0, max: 0 },
       };
     }
   }
@@ -645,7 +687,9 @@ export class SecureStorage {
       const history = this.getAnalysisHistory();
       const cache = this.getCachedResults();
 
-      return preferences !== null && Array.isArray(history) && Array.isArray(cache);
+      return (
+        preferences !== null && Array.isArray(history) && Array.isArray(cache)
+      );
     } catch (error) {
       console.error('Storage integrity check failed:', error);
       return false;

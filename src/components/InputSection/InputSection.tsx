@@ -1,16 +1,24 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Upload, Trash2, Play, AlertTriangle, CheckCircle, Globe, Lightbulb } from 'lucide-react';
+import {
+  Upload,
+  Trash2,
+  Play,
+  AlertTriangle,
+  CheckCircle,
+  Globe,
+  Lightbulb,
+} from 'lucide-react';
 import { useApplication } from '@/store/ApplicationStore';
 
 const InputSection: React.FC = () => {
-  const { 
-    currentText, 
-    isAnalyzing, 
+  const {
+    currentText,
+    isAnalyzing,
     analysisProgress,
-    analyzeText, 
+    analyzeText,
     clearResults,
     isApiKeyValid,
-    setAnalysisError
+    setAnalysisError,
   } = useApplication();
 
   const [text, setText] = useState(currentText || '');
@@ -31,31 +39,37 @@ const InputSection: React.FC = () => {
     await analyzeText(text);
   }, [text, analyzeText, isApiKeyValid, setAnalysisError]);
 
-  const handleFileUpload = useCallback((file: File) => {
-    if (!file.name.endsWith('.md') && !file.name.endsWith('.txt')) {
-      setAnalysisError('Sono supportati solo file .md e .txt');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      if (content) {
-        setText(content);
+  const handleFileUpload = useCallback(
+    (file: File) => {
+      if (!file.name.endsWith('.md') && !file.name.endsWith('.txt')) {
+        setAnalysisError('Sono supportati solo file .md e .txt');
+        return;
       }
-    };
-    reader.readAsText(file);
-  }, [setAnalysisError]);
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setDragOver(false);
+      const reader = new FileReader();
+      reader.onload = e => {
+        const content = e.target?.result as string;
+        if (content) {
+          setText(content);
+        }
+      };
+      reader.readAsText(file);
+    },
+    [setAnalysisError]
+  );
 
-    const files = Array.from(e.dataTransfer.files);
-    if (files.length > 0) {
-      handleFileUpload(files[0]);
-    }
-  }, [handleFileUpload]);
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragOver(false);
+
+      const files = Array.from(e.dataTransfer.files);
+      if (files.length > 0) {
+        handleFileUpload(files[0]);
+      }
+    },
+    [handleFileUpload]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -67,12 +81,15 @@ const InputSection: React.FC = () => {
     setDragOver(false);
   }, []);
 
-  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      handleFileUpload(files[0]);
-    }
-  }, [handleFileUpload]);
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const files = e.target.files;
+      if (files && files.length > 0) {
+        handleFileUpload(files[0]);
+      }
+    },
+    [handleFileUpload]
+  );
 
   const handleClear = useCallback(() => {
     setText('');
@@ -80,12 +97,16 @@ const InputSection: React.FC = () => {
   }, [clearResults]);
 
   // Word count calculation
-  const wordCount = text.trim().split(/\s+/).filter(word => word.length > 0).length;
-  
+  const wordCount = text
+    .trim()
+    .split(/\s+/)
+    .filter(word => word.length > 0).length;
+
   // Italian language detection and validation
   const italianAnalysis = useMemo(() => {
-    if (!text.trim()) return { isItalian: false, confidence: 0, indicators: [] };
-    
+    if (!text.trim())
+      return { isItalian: false, confidence: 0, indicators: [] };
+
     const italianIndicators = [
       // Common Italian words
       /\b(il|la|lo|le|gli|un|una|uno|del|della|dello|dei|degli|delle|nel|nella|nello|nei|negli|nelle)\b/gi,
@@ -98,78 +119,109 @@ const InputSection: React.FC = () => {
       // Italian geographical terms
       /\b(piazza|via|corso|viale|monte|lago|fiume|isola|regione|provincia|comune|città|paese|borgo)\b/gi,
       // Italian cultural terms
-      /\b(arte|cultura|storia|tradizione|festival|cucina|pasta|pizza|risotto|gelato|espresso|cappuccino|basilica|duomo|palazzo|castello|museo|teatro|opera)\b/gi
+      /\b(arte|cultura|storia|tradizione|festival|cucina|pasta|pizza|risotto|gelato|espresso|cappuccino|basilica|duomo|palazzo|castello|museo|teatro|opera)\b/gi,
     ];
-    
+
     let totalMatches = 0;
     const indicators: string[] = [];
-    
+
     italianIndicators.forEach((regex, index) => {
       const matches = text.match(regex);
       if (matches) {
         totalMatches += matches.length;
-        switch(index) {
-          case 0: indicators.push('Articoli italiani'); break;
-          case 1: indicators.push('Verbi italiani'); break;
-          case 2: indicators.push('Città italiane'); break;
-          case 3: indicators.push('Cognomi italiani'); break;
-          case 4: indicators.push('Termini geografici'); break;
-          case 5: indicators.push('Cultura italiana'); break;
+        switch (index) {
+          case 0:
+            indicators.push('Articoli italiani');
+            break;
+          case 1:
+            indicators.push('Verbi italiani');
+            break;
+          case 2:
+            indicators.push('Città italiane');
+            break;
+          case 3:
+            indicators.push('Cognomi italiani');
+            break;
+          case 4:
+            indicators.push('Termini geografici');
+            break;
+          case 5:
+            indicators.push('Cultura italiana');
+            break;
         }
       }
     });
-    
+
     const confidence = Math.min(totalMatches / Math.max(1, wordCount / 10), 1);
     const isItalian = confidence > 0.3;
-    
+
     return { isItalian, confidence, indicators: [...new Set(indicators)] };
   }, [text, wordCount]);
-  
+
   // Italian cultural context suggestions
   const italianSuggestions = useMemo(() => {
     const suggestions = [];
-    
+
     if (text.toLowerCase().includes('roma')) {
-      suggestions.push('💡 Considera di aggiungere informazioni su monumenti romani come il Colosseo, Foro Romano, o Pantheon');
+      suggestions.push(
+        '💡 Considera di aggiungere informazioni su monumenti romani come il Colosseo, Foro Romano, o Pantheon'
+      );
     }
-    
+
     if (text.toLowerCase().includes('milano')) {
-      suggestions.push('💡 Potresti menzionare La Scala, il Duomo, o la Quadrilatero della Moda');
+      suggestions.push(
+        '💡 Potresti menzionare La Scala, il Duomo, o la Quadrilatero della Moda'
+      );
     }
-    
+
     if (text.toLowerCase().includes('firenze')) {
-      suggestions.push('💡 Aggiungi riferimenti agli Uffizi, Ponte Vecchio, o ai Medici per un contesto storico più ricco');
+      suggestions.push(
+        '💡 Aggiungi riferimenti agli Uffizi, Ponte Vecchio, o ai Medici per un contesto storico più ricco'
+      );
     }
-    
+
     if (text.toLowerCase().includes('venezia')) {
-      suggestions.push('💡 Includi Piazza San Marco, Palazzo Ducale, o il Carnevale per arricchire il testo');
+      suggestions.push(
+        '💡 Includi Piazza San Marco, Palazzo Ducale, o il Carnevale per arricchire il testo'
+      );
     }
-    
+
     if (text.toLowerCase().includes('napoli')) {
-      suggestions.push('💡 Menziona il Vesuvio, Pompei, o la pizza napoletana per maggiore contesto culturale');
+      suggestions.push(
+        '💡 Menziona il Vesuvio, Pompei, o la pizza napoletana per maggiore contesto culturale'
+      );
     }
-    
+
     if (/\b(pasta|pizza|risotto|gelato)\b/i.test(text)) {
-      suggestions.push('💡 Specifica le origini regionali dei piatti italiani per relazioni geografiche più precise');
+      suggestions.push(
+        '💡 Specifica le origini regionali dei piatti italiani per relazioni geografiche più precise'
+      );
     }
-    
+
     if (/\b(renaissance|rinascimento)\b/i.test(text)) {
-      suggestions.push('💡 Aggiungi nomi di artisti come Leonardo, Michelangelo, o Raffaello');
+      suggestions.push(
+        '💡 Aggiungi nomi di artisti come Leonardo, Michelangelo, o Raffaello'
+      );
     }
-    
+
     if (text.split(/\s+/).length < 50) {
-      suggestions.push('📝 Testi più lunghi permettono di estrarre relazioni semantiche più ricche');
+      suggestions.push(
+        '📝 Testi più lunghi permettono di estrarre relazioni semantiche più ricche'
+      );
     }
-    
+
     if (!text.includes('.') && text.length > 100) {
-      suggestions.push('📝 Aggiungi punteggiatura per migliorare l\'analisi delle frasi');
+      suggestions.push(
+        "📝 Aggiungi punteggiatura per migliorare l'analisi delle frasi"
+      );
     }
-    
+
     return suggestions.slice(0, 3); // Limit to 3 suggestions
   }, [text]);
-  
+
   // Analyze markdown structure if present
-  const isMarkdown = text.includes('#') || text.includes('[') || text.includes('```');
+  const isMarkdown =
+    text.includes('#') || text.includes('[') || text.includes('```');
   const estimatedTime = Math.ceil(wordCount / 200); // Reading time estimation
 
   return (
@@ -183,29 +235,31 @@ const InputSection: React.FC = () => {
         <div className="flex items-center space-x-2">
           {/* Italian language indicator */}
           {text.trim() && (
-            <div className={`flex items-center space-x-1 px-2 py-1 text-xs rounded ${
-              italianAnalysis.isItalian 
-                ? 'bg-green-100 text-green-800'
-                : 'bg-yellow-100 text-yellow-800'
-            }`}>
+            <div
+              className={`flex items-center space-x-1 px-2 py-1 text-xs rounded ${
+                italianAnalysis.isItalian
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-yellow-100 text-yellow-800'
+              }`}
+            >
               {italianAnalysis.isItalian ? (
                 <CheckCircle className="w-3 h-3" />
               ) : (
                 <AlertTriangle className="w-3 h-3" />
               )}
               <span>
-                {italianAnalysis.isItalian ? 'Italiano' : 'Non italiano'} 
-                ({Math.round(italianAnalysis.confidence * 100)}%)
+                {italianAnalysis.isItalian ? 'Italiano' : 'Non italiano'}(
+                {Math.round(italianAnalysis.confidence * 100)}%)
               </span>
             </div>
           )}
-          
+
           {isMarkdown && (
             <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
               Markdown
             </span>
           )}
-          
+
           {wordCount > 0 && (
             <span className="text-sm text-gray-500">
               {wordCount} parole • {estimatedTime} min
@@ -213,15 +267,20 @@ const InputSection: React.FC = () => {
           )}
         </div>
       </div>
-      
+
       {/* Italian analysis details */}
       {text.trim() && italianAnalysis.indicators.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
           <div className="text-sm">
-            <span className="font-medium text-blue-800">Indicatori italiani rilevati:</span>
+            <span className="font-medium text-blue-800">
+              Indicatori italiani rilevati:
+            </span>
             <div className="flex flex-wrap gap-1 mt-1">
               {italianAnalysis.indicators.map((indicator, index) => (
-                <span key={index} className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded">
+                <span
+                  key={index}
+                  className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded"
+                >
                   {indicator}
                 </span>
               ))}
@@ -229,14 +288,16 @@ const InputSection: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {/* Cultural context suggestions */}
       {italianSuggestions.length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
           <div className="flex items-start">
             <Lightbulb className="w-4 h-4 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
             <div className="text-sm">
-              <div className="font-medium text-yellow-800 mb-2">Suggerimenti per arricchire il contesto italiano:</div>
+              <div className="font-medium text-yellow-800 mb-2">
+                Suggerimenti per arricchire il contesto italiano:
+              </div>
               <div className="space-y-1">
                 {italianSuggestions.map((suggestion, index) => (
                   <div key={index} className="text-yellow-700 text-xs">
@@ -258,8 +319,8 @@ const InputSection: React.FC = () => {
       {/* File upload area */}
       <div
         className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
-          dragOver 
-            ? 'border-italian-green bg-green-50' 
+          dragOver
+            ? 'border-italian-green bg-green-50'
             : 'border-gray-300 hover:border-gray-400'
         }`}
         onDrop={handleDrop}
@@ -271,7 +332,7 @@ const InputSection: React.FC = () => {
           <div className="mt-4">
             <label htmlFor="file-upload" className="cursor-pointer">
               <span className="mt-2 block text-sm font-medium text-gray-900">
-                Trascina un file Markdown o 
+                Trascina un file Markdown o
                 <span className="text-italian-green"> sfoglia</span>
               </span>
             </label>
@@ -292,7 +353,10 @@ const InputSection: React.FC = () => {
 
       {/* Text input */}
       <div className="space-y-2">
-        <label htmlFor="text-input" className="block text-sm font-medium text-gray-700">
+        <label
+          htmlFor="text-input"
+          className="block text-sm font-medium text-gray-700"
+        >
           Testo da Analizzare
         </label>
         <textarea
@@ -308,7 +372,7 @@ Milano è una città nel nord Italia, capitale della regione Lombardia. È famos
 ## Storia
 La città fu fondata dai Celti e successivamente conquistata dai Romani..."
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={e => setText(e.target.value)}
           disabled={isAnalyzing}
         />
       </div>
@@ -342,20 +406,16 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
 
         <div className="flex items-center space-x-3">
           {text && (
-            <div className="text-sm text-gray-500">
-              {text.length} caratteri
-            </div>
+            <div className="text-sm text-gray-500">{text.length} caratteri</div>
           )}
-          
+
           <button
             onClick={handleAnalyze}
             disabled={!text.trim() || isAnalyzing || !isApiKeyValid}
             className="btn-primary flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Play className="w-4 h-4" />
-            <span>
-              {isAnalyzing ? 'Analizzando...' : 'Analizza Testo'}
-            </span>
+            <span>{isAnalyzing ? 'Analizzando...' : 'Analizza Testo'}</span>
           </button>
         </div>
       </div>
@@ -368,7 +428,9 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h5 className="font-medium text-gray-800 mb-1">Contenuto ideale:</h5>
+            <h5 className="font-medium text-gray-800 mb-1">
+              Contenuto ideale:
+            </h5>
             <ul className="space-y-1 text-sm">
               <li>• Testo in italiano standard</li>
               <li>• Luoghi italiani (città, regioni, monumenti)</li>
@@ -390,8 +452,9 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
         </div>
         <div className="mt-3 pt-3 border-t border-gray-200">
           <p className="text-xs text-gray-500">
-            <strong>Nota:</strong> Il sistema è ottimizzato per l'italiano e riconosce dialetti regionali, 
-            nomi storici, geografia italiana e relazioni culturali specifiche.
+            <strong>Nota:</strong> Il sistema è ottimizzato per l'italiano e
+            riconosce dialetti regionali, nomi storici, geografia italiana e
+            relazioni culturali specifiche.
           </p>
         </div>
       </div>

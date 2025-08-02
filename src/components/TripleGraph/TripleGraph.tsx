@@ -2,7 +2,13 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import { SemanticTriple } from '@/types/triples';
 import { useApplication } from '@/store/ApplicationStore';
-import { Maximize2, Minimize2, RotateCcw, Download, Filter } from 'lucide-react';
+import {
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  Download,
+  Filter,
+} from 'lucide-react';
 
 interface TripleGraphProps {
   triples: SemanticTriple[];
@@ -38,50 +44,53 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
   width = 800,
   height = 600,
   onNodeClick,
-  onEdgeClick
+  onEdgeClick,
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { selectEntity, selectTriple } = useApplication();
-  
+
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [selectedPredicateType, setSelectedPredicateType] = useState<string>('all');
+  const [selectedPredicateType, setSelectedPredicateType] =
+    useState<string>('all');
   const [minConfidence, setMinConfidence] = useState<number>(0);
-  
+
   // Get Italian labels for predicates
   const getItalianPredicateLabel = (type: string): string => {
     const labels: Record<string, string> = {
-      'LOCATED_IN': 'si trova in',
-      'BORN_IN': 'nato in',
-      'DIED_IN': 'morto in',
-      'FOUNDED': 'ha fondato',
-      'CREATED': 'ha creato',
-      'PAINTED': 'ha dipinto',
-      'WROTE': 'ha scritto',
-      'COMPOSED': 'ha composto',
-      'DIRECTED': 'ha diretto',
-      'ACTED_IN': 'ha recitato in',
-      'MAYOR_OF': 'sindaco di',
-      'CAPITAL_OF': 'capitale di',
-      'MEMBER_OF': 'membro di',
-      'WORKS_FOR': 'lavora per',
-      'PART_OF': 'parte di',
-      'BORDERS_WITH': 'confina con',
-      'NEAR': 'vicino a',
-      'FLOWS_THROUGH': 'attraversa',
-      'PATRON_SAINT_OF': 'santo patrono di',
-      'CELEBRATES': 'celebra',
-      'SPECIALTY_OF': 'specialità di',
-      'PRODUCED_IN': 'prodotto in'
+      LOCATED_IN: 'si trova in',
+      BORN_IN: 'nato in',
+      DIED_IN: 'morto in',
+      FOUNDED: 'ha fondato',
+      CREATED: 'ha creato',
+      PAINTED: 'ha dipinto',
+      WROTE: 'ha scritto',
+      COMPOSED: 'ha composto',
+      DIRECTED: 'ha diretto',
+      ACTED_IN: 'ha recitato in',
+      MAYOR_OF: 'sindaco di',
+      CAPITAL_OF: 'capitale di',
+      MEMBER_OF: 'membro di',
+      WORKS_FOR: 'lavora per',
+      PART_OF: 'parte di',
+      BORDERS_WITH: 'confina con',
+      NEAR: 'vicino a',
+      FLOWS_THROUGH: 'attraversa',
+      PATRON_SAINT_OF: 'santo patrono di',
+      CELEBRATES: 'celebra',
+      SPECIALTY_OF: 'specialità di',
+      PRODUCED_IN: 'prodotto in',
     };
     return labels[type] || type.toLowerCase().replace('_', ' ');
   };
 
   // Prepare graph data
   const prepareGraphData = useCallback(() => {
-    const filteredTriples = triples.filter(triple => 
-      triple.confidence >= minConfidence &&
-      (selectedPredicateType === 'all' || triple.predicate.type === selectedPredicateType)
+    const filteredTriples = triples.filter(
+      triple =>
+        triple.confidence >= minConfidence &&
+        (selectedPredicateType === 'all' ||
+          triple.predicate.type === selectedPredicateType)
     );
 
     const nodeMap = new Map<string, GraphNode>();
@@ -95,7 +104,7 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
           text: triple.subject.text,
           type: 'subject',
           entityType: triple.subject.type,
-          connections: 0
+          connections: 0,
         });
       }
 
@@ -106,7 +115,7 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
           text: triple.object.text,
           type: 'object',
           entityType: triple.object.type,
-          connections: 0
+          connections: 0,
         });
       }
 
@@ -121,13 +130,13 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
         predicate: getItalianPredicateLabel(triple.predicate.type),
         predicateType: triple.predicate.type,
         confidence: triple.confidence,
-        tripleId: triple.id
+        tripleId: triple.id,
       });
     });
 
     return {
       nodes: Array.from(nodeMap.values()),
-      links
+      links,
     };
   }, [triples, selectedPredicateType, minConfidence]);
 
@@ -145,9 +154,10 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
     const currentHeight = isFullscreen ? window.innerHeight - 200 : height;
 
     // Set up zoom behavior
-    const zoom = d3.zoom<SVGSVGElement, unknown>()
+    const zoom = d3
+      .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 3])
-      .on('zoom', (event) => {
+      .on('zoom', event => {
         container.attr('transform', event.transform);
       });
 
@@ -156,18 +166,24 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
     const container = svg.append('g');
 
     // Create force simulation
-    const simulation = d3.forceSimulation<GraphNode>(nodes)
-      .force('link', d3.forceLink<GraphNode, GraphLink>(links)
-        .id(d => d.id)
-        .distance(100)
-        .strength(0.5))
+    const simulation = d3
+      .forceSimulation<GraphNode>(nodes)
+      .force(
+        'link',
+        d3
+          .forceLink<GraphNode, GraphLink>(links)
+          .id(d => d.id)
+          .distance(100)
+          .strength(0.5)
+      )
       .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(currentWidth / 2, currentHeight / 2))
       .force('collision', d3.forceCollide().radius(30));
 
     // Create arrow markers for directed edges
     const defs = svg.append('defs');
-    defs.append('marker')
+    defs
+      .append('marker')
       .attr('id', 'arrow')
       .attr('viewBox', '0 -5 10 10')
       .attr('refX', 20)
@@ -180,7 +196,8 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
       .attr('fill', '#666');
 
     // Create links
-    const link = container.append('g')
+    const link = container
+      .append('g')
       .attr('class', 'links')
       .selectAll('g')
       .data(links)
@@ -188,7 +205,8 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
       .attr('class', 'link-group');
 
     // Link lines
-    const linkLines = link.append('line')
+    const linkLines = link
+      .append('line')
       .attr('stroke', '#999')
       .attr('stroke-opacity', 0.8)
       .attr('stroke-width', d => Math.sqrt(d.confidence * 4))
@@ -205,11 +223,13 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
           selectTriple(triple);
         }
       })
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function (event, d) {
         d3.select(this).attr('stroke', '#009246').attr('stroke-width', 3);
-        
+
         // Show tooltip
-        const tooltip = d3.select('body').append('div')
+        const tooltip = d3
+          .select('body')
+          .append('div')
           .attr('class', 'graph-tooltip')
           .style('position', 'absolute')
           .style('background', 'rgba(0, 0, 0, 0.9)')
@@ -218,25 +238,27 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
           .style('border-radius', '6px')
           .style('font-size', '12px')
           .style('pointer-events', 'none')
-          .style('z-index', '1000')
-          .html(`
+          .style('z-index', '1000').html(`
             <div><strong>${d.predicate}</strong></div>
             <div>Confidenza: ${Math.round(d.confidence * 100)}%</div>
           `);
-        
+
         if (event && 'pageX' in event && 'pageY' in event) {
           tooltip
-            .style('left', ((event as MouseEvent).pageX + 10) + 'px')
-            .style('top', ((event as MouseEvent).pageY - 10) + 'px');
+            .style('left', (event as MouseEvent).pageX + 10 + 'px')
+            .style('top', (event as MouseEvent).pageY - 10 + 'px');
         }
       })
-      .on('mouseout', function(_event, d) {
-        d3.select(this).attr('stroke', '#999').attr('stroke-width', Math.sqrt(d.confidence * 4));
+      .on('mouseout', function (_event, d) {
+        d3.select(this)
+          .attr('stroke', '#999')
+          .attr('stroke-width', Math.sqrt(d.confidence * 4));
         d3.selectAll('.graph-tooltip').remove();
       });
 
     // Link labels (predicates)
-    const linkLabels = link.append('text')
+    const linkLabels = link
+      .append('text')
       .attr('class', 'link-label')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
@@ -246,31 +268,36 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
       .text(d => d.predicate);
 
     // Create nodes
-    const node = container.append('g')
+    const node = container
+      .append('g')
       .attr('class', 'nodes')
       .selectAll('g')
       .data(nodes)
       .join('g')
       .attr('class', 'node')
       .style('cursor', 'pointer')
-      .call(d3.drag<SVGGElement, GraphNode>()
-        .on('start', (event, d) => {
-          if (!event.active) simulation.alphaTarget(0.3).restart();
-          d.fx = d.x;
-          d.fy = d.y;
-        })
-        .on('drag', (event, d) => {
-          d.fx = event.x;
-          d.fy = event.y;
-        })
-        .on('end', (event, d) => {
-          if (!event.active) simulation.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
-        }) as any);
+      .call(
+        d3
+          .drag<SVGGElement, GraphNode>()
+          .on('start', (event, d) => {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+          })
+          .on('drag', (event, d) => {
+            d.fx = event.x;
+            d.fy = event.y;
+          })
+          .on('end', (event, d) => {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+          }) as any
+      );
 
     // Node circles
-    node.append('circle')
+    node
+      .append('circle')
       .attr('r', d => Math.max(8, Math.min(20, d.connections * 3)))
       .attr('fill', d => {
         // Italian-themed colors based on entity type
@@ -278,7 +305,8 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
         if (d.entityType?.includes('PERSON')) return '#3B82F6'; // Blue
         if (d.entityType?.includes('LOCATION')) return '#10B981'; // Green
         if (d.entityType?.includes('ORGANIZATION')) return '#8B5CF6'; // Purple
-        if (d.entityType?.includes('DATE') || d.entityType?.includes('TIME')) return '#F59E0B'; // Amber
+        if (d.entityType?.includes('DATE') || d.entityType?.includes('TIME'))
+          return '#F59E0B'; // Amber
         if (d.entityType?.includes('EVENT')) return '#EC4899'; // Pink
         return '#6B7280'; // Gray default
       })
@@ -290,17 +318,22 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
           onNodeClick(d.id);
         }
         // Find and select the corresponding entity
-        const allEntities = [...triples.map(t => t.subject), ...triples.map(t => t.object)];
+        const allEntities = [
+          ...triples.map(t => t.subject),
+          ...triples.map(t => t.object),
+        ];
         const entity = allEntities.find(e => e.id === d.id);
         if (entity && entity.entityRef) {
           selectEntity(entity.entityRef);
         }
       })
-      .on('mouseover', function(event, d) {
+      .on('mouseover', function (event, d) {
         d3.select(this).attr('stroke', '#CE2B37').attr('stroke-width', 3); // Italian red
-        
+
         // Show tooltip
-        const tooltip = d3.select('body').append('div')
+        const tooltip = d3
+          .select('body')
+          .append('div')
           .attr('class', 'graph-tooltip')
           .style('position', 'absolute')
           .style('background', 'rgba(0, 0, 0, 0.9)')
@@ -309,26 +342,26 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
           .style('border-radius', '6px')
           .style('font-size', '12px')
           .style('pointer-events', 'none')
-          .style('z-index', '1000')
-          .html(`
+          .style('z-index', '1000').html(`
             <div><strong>${d.text}</strong></div>
             <div>Tipo: ${d.entityType || 'N/A'}</div>
             <div>Connessioni: ${d.connections}</div>
           `);
-        
+
         if (event && 'pageX' in event && 'pageY' in event) {
           tooltip
-            .style('left', ((event as MouseEvent).pageX + 10) + 'px')
-            .style('top', ((event as MouseEvent).pageY - 10) + 'px');
+            .style('left', (event as MouseEvent).pageX + 10 + 'px')
+            .style('top', (event as MouseEvent).pageY - 10 + 'px');
         }
       })
-      .on('mouseout', function(_event, _d) {
+      .on('mouseout', function (_event, _d) {
         d3.select(this).attr('stroke', '#fff').attr('stroke-width', 2);
         d3.selectAll('.graph-tooltip').remove();
       });
 
     // Node labels
-    node.append('text')
+    node
+      .append('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
       .attr('dominant-baseline', 'middle')
@@ -336,7 +369,9 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
       .attr('font-weight', 'bold')
       .attr('fill', 'white')
       .attr('pointer-events', 'none')
-      .text(d => d.text.length > 12 ? d.text.substring(0, 12) + '...' : d.text);
+      .text(d =>
+        d.text.length > 12 ? d.text.substring(0, 12) + '...' : d.text
+      );
 
     // Update positions on simulation tick
     simulation.on('tick', () => {
@@ -347,11 +382,16 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
         .attr('y2', d => (d.target as GraphNode).y || 0);
 
       linkLabels
-        .attr('x', d => ((d.source as GraphNode).x! + (d.target as GraphNode).x!) / 2)
-        .attr('y', d => ((d.source as GraphNode).y! + (d.target as GraphNode).y!) / 2);
+        .attr(
+          'x',
+          d => ((d.source as GraphNode).x! + (d.target as GraphNode).x!) / 2
+        )
+        .attr(
+          'y',
+          d => ((d.source as GraphNode).y! + (d.target as GraphNode).y!) / 2
+        );
 
-      node
-        .attr('transform', d => `translate(${d.x},${d.y})`);
+      node.attr('transform', d => `translate(${d.x},${d.y})`);
     });
 
     // Cleanup function
@@ -359,10 +399,22 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
       simulation.stop();
       d3.selectAll('.graph-tooltip').remove();
     };
-  }, [triples, prepareGraphData, width, height, isFullscreen, onNodeClick, onEdgeClick, selectEntity, selectTriple]);
+  }, [
+    triples,
+    prepareGraphData,
+    width,
+    height,
+    isFullscreen,
+    onNodeClick,
+    onEdgeClick,
+    selectEntity,
+    selectTriple,
+  ]);
 
   // Get unique predicate types for filter
-  const predicateTypes = Array.from(new Set(triples.map(t => t.predicate.type)));
+  const predicateTypes = Array.from(
+    new Set(triples.map(t => t.predicate.type))
+  );
 
   // Reset visualization
   const resetGraph = useCallback(() => {
@@ -406,16 +458,16 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
   const currentHeight = isFullscreen ? window.innerHeight - 200 : height;
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`bg-white rounded-lg border ${
-        isFullscreen 
-          ? 'fixed inset-4 z-50 flex flex-col'
-          : 'p-4'
+        isFullscreen ? 'fixed inset-4 z-50 flex flex-col' : 'p-4'
       }`}
     >
       {/* Header */}
-      <div className={`${isFullscreen ? 'p-4 border-b' : 'mb-4'} flex items-center justify-between`}>
+      <div
+        className={`${isFullscreen ? 'p-4 border-b' : 'mb-4'} flex items-center justify-between`}
+      >
         <div>
           <h3 className="text-lg font-medium text-gray-900 flex items-center">
             <span className="text-2xl mr-2">🇮🇹</span>
@@ -425,7 +477,7 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
             Visualizzazione interattiva D3.js delle triple estratte
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <button
             onClick={resetGraph}
@@ -446,19 +498,25 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
             className="p-2 text-gray-600 hover:text-gray-800 rounded hover:bg-gray-100"
             title={isFullscreen ? 'Esci da Schermo Intero' : 'Schermo Intero'}
           >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            {isFullscreen ? (
+              <Minimize2 className="w-4 h-4" />
+            ) : (
+              <Maximize2 className="w-4 h-4" />
+            )}
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className={`${isFullscreen ? 'px-4 pb-4 border-b' : 'mb-4'} flex items-center space-x-4 text-sm`}>
+      <div
+        className={`${isFullscreen ? 'px-4 pb-4 border-b' : 'mb-4'} flex items-center space-x-4 text-sm`}
+      >
         <div className="flex items-center space-x-2">
           <Filter className="w-4 h-4 text-gray-500" />
           <label className="text-gray-700">Tipo Relazione:</label>
           <select
             value={selectedPredicateType}
-            onChange={(e) => setSelectedPredicateType(e.target.value)}
+            onChange={e => setSelectedPredicateType(e.target.value)}
             className="form-input text-xs py-1 px-2 h-8"
           >
             <option value="all">Tutte</option>
@@ -469,7 +527,7 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
             ))}
           </select>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <label className="text-gray-700">Confidenza min:</label>
           <input
@@ -478,15 +536,19 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
             max="1"
             step="0.1"
             value={minConfidence}
-            onChange={(e) => setMinConfidence(parseFloat(e.target.value))}
+            onChange={e => setMinConfidence(parseFloat(e.target.value))}
             className="w-20"
           />
-          <span className="text-gray-600 w-8">{Math.round(minConfidence * 100)}%</span>
+          <span className="text-gray-600 w-8">
+            {Math.round(minConfidence * 100)}%
+          </span>
         </div>
       </div>
-      
+
       {/* Graph container */}
-      <div className={`border rounded-lg overflow-hidden ${isFullscreen ? 'flex-1' : ''}`}>
+      <div
+        className={`border rounded-lg overflow-hidden ${isFullscreen ? 'flex-1' : ''}`}
+      >
         <svg
           ref={svgRef}
           width={currentWidth}
@@ -495,18 +557,32 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
           style={{ background: '#fafafa' }}
         />
       </div>
-      
+
       {/* Graph legend and stats */}
-      <div className={`${isFullscreen ? 'p-4 border-t' : 'mt-4'} flex items-center justify-between text-sm text-gray-500`}>
+      <div
+        className={`${isFullscreen ? 'p-4 border-t' : 'mt-4'} flex items-center justify-between text-sm text-gray-500`}
+      >
         <div className="flex items-center space-x-4">
           <span>
-            {triples.filter(t => 
-              t.confidence >= minConfidence && 
-              (selectedPredicateType === 'all' || t.predicate.type === selectedPredicateType)
-            ).length} relazioni visualizzate • {new Set([...triples.map(t => t.subject.id), ...triples.map(t => t.object.id)]).size} entità totali
+            {
+              triples.filter(
+                t =>
+                  t.confidence >= minConfidence &&
+                  (selectedPredicateType === 'all' ||
+                    t.predicate.type === selectedPredicateType)
+              ).length
+            }{' '}
+            relazioni visualizzate •{' '}
+            {
+              new Set([
+                ...triples.map(t => t.subject.id),
+                ...triples.map(t => t.object.id),
+              ]).size
+            }{' '}
+            entità totali
           </span>
         </div>
-        
+
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-1">
             <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
@@ -517,7 +593,10 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
             <span>Luoghi</span>
           </div>
           <div className="flex items-center space-x-1">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#009246' }}></div>
+            <div
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: '#009246' }}
+            ></div>
             <span>Italiani</span>
           </div>
           <div className="flex items-center space-x-1">
@@ -530,10 +609,14 @@ const TripleGraph: React.FC<TripleGraphProps> = ({
           </div>
         </div>
       </div>
-      
+
       {/* Instructions */}
-      <div className={`${isFullscreen ? 'px-4 pb-4' : 'mt-2'} text-xs text-gray-500`}>
-        <strong>Istruzioni:</strong> Trascina i nodi per riposizionarli • Clicca su nodi e collegamenti per selezionarli • Usa la rotella per zoom • Trascina per panoramica
+      <div
+        className={`${isFullscreen ? 'px-4 pb-4' : 'mt-2'} text-xs text-gray-500`}
+      >
+        <strong>Istruzioni:</strong> Trascina i nodi per riposizionarli • Clicca
+        su nodi e collegamenti per selezionarli • Usa la rotella per zoom •
+        Trascina per panoramica
       </div>
     </div>
   );

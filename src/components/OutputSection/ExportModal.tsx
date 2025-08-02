@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Download, X, FileText, Database, Code, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  Download,
+  X,
+  FileText,
+  Database,
+  Code,
+  CheckCircle,
+  AlertCircle,
+} from 'lucide-react';
 import { ItalianEntity } from '@/types/entities';
 import { SemanticTriple, TripleAnalytics } from '@/types/triples';
 import { ExportService } from '@/utils/export';
@@ -28,9 +36,11 @@ const ExportModal: React.FC<ExportModalProps> = ({
   triples,
   analytics,
   isOpen,
-  onClose
+  onClose,
 }) => {
-  const [selectedFormats, setSelectedFormats] = useState<Set<ExportFormat>>(new Set(['json']));
+  const [selectedFormats, setSelectedFormats] = useState<Set<ExportFormat>>(
+    new Set(['json'])
+  );
   const [includeMetadata, setIncludeMetadata] = useState(true);
   const [includeAnalytics, setIncludeAnalytics] = useState(true);
   const [includeItalianContext, setIncludeItalianContext] = useState(true);
@@ -42,10 +52,11 @@ const ExportModal: React.FC<ExportModalProps> = ({
     {
       format: 'json',
       label: 'JSON Strutturato',
-      description: 'Formato JSON completo con tutte le entità, triple e metadati italiani',
+      description:
+        'Formato JSON completo con tutte le entità, triple e metadati italiani',
       icon: Code,
       extension: 'json',
-      mimeType: 'application/json'
+      mimeType: 'application/json',
     },
     {
       format: 'csv',
@@ -53,7 +64,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
       description: 'Formato CSV per analisi in Excel o Google Sheets',
       icon: FileText,
       extension: 'csv',
-      mimeType: 'text/csv'
+      mimeType: 'text/csv',
     },
     {
       format: 'rdf',
@@ -61,7 +72,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
       description: 'Standard RDF per integrazione con knowledge graphs',
       icon: Database,
       extension: 'rdf',
-      mimeType: 'application/rdf+xml'
+      mimeType: 'application/rdf+xml',
     },
     {
       format: 'turtle',
@@ -69,7 +80,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
       description: 'Formato Turtle per web semantico e linked data',
       icon: Database,
       extension: 'ttl',
-      mimeType: 'text/turtle'
+      mimeType: 'text/turtle',
     },
     {
       format: 'xml',
@@ -77,8 +88,8 @@ const ExportModal: React.FC<ExportModalProps> = ({
       description: 'Formato XML per integrazione con sistemi enterprise',
       icon: Code,
       extension: 'xml',
-      mimeType: 'application/xml'
-    }
+      mimeType: 'application/xml',
+    },
   ];
 
   const toggleFormat = (format: ExportFormat) => {
@@ -107,10 +118,10 @@ const ExportModal: React.FC<ExportModalProps> = ({
         includeAnalytics: includeAnalytics && !!analytics,
         includeItalianContext,
         italianLabels: true,
-        culturalContext: true
+        culturalContext: true,
       };
 
-      const exportPromises = Array.from(selectedFormats).map(async (format) => {
+      const exportPromises = Array.from(selectedFormats).map(async format => {
         return ExportService.exportResults(
           entities,
           triples,
@@ -130,13 +141,12 @@ const ExportModal: React.FC<ExportModalProps> = ({
         onClose();
         setExportSuccess(null);
       }, 2000);
-
     } catch (error) {
       console.error('Export failed:', error);
       setExportError(
-        error instanceof Error 
+        error instanceof Error
           ? `Errore durante l'esportazione: ${error.message}`
-          : 'Errore sconosciuto durante l\'esportazione'
+          : "Errore sconosciuto durante l'esportazione"
       );
     } finally {
       setIsExporting(false);
@@ -146,21 +156,27 @@ const ExportModal: React.FC<ExportModalProps> = ({
   const getFilePreview = () => {
     const fileCount = selectedFormats.size;
     if (fileCount === 0) return 'Nessun file';
-    
-    const formatList = Array.from(selectedFormats).map(format => 
-      exportOptions.find(opt => opt.format === format)?.extension.toUpperCase()
-    ).join(', ');
-    
+
+    const formatList = Array.from(selectedFormats)
+      .map(format =>
+        exportOptions
+          .find(opt => opt.format === format)
+          ?.extension.toUpperCase()
+      )
+      .join(', ');
+
     return `${fileCount} file: ${formatList}`;
   };
 
   const getTotalEntitiesCount = () => entities.length;
   const getTotalTriplesCount = () => triples.length;
-  const getItalianEntitiesCount = () => entities.filter(e => 
-    e.type.includes('ITALIAN') || 
-    e.metadata?.region || 
-    e.metadata?.culturalContext
-  ).length;
+  const getItalianEntitiesCount = () =>
+    entities.filter(
+      e =>
+        e.type.includes('ITALIAN') ||
+        e.metadata?.region ||
+        e.metadata?.culturalContext
+    ).length;
 
   if (!isOpen) return null;
 
@@ -168,7 +184,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {/* Background overlay */}
-        <div 
+        <div
           className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
           onClick={onClose}
         />
@@ -191,18 +207,26 @@ const ExportModal: React.FC<ExportModalProps> = ({
 
           {/* Content preview */}
           <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="font-medium text-gray-900 mb-2">Contenuto da esportare:</h4>
+            <h4 className="font-medium text-gray-900 mb-2">
+              Contenuto da esportare:
+            </h4>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{getTotalEntitiesCount()}</div>
+                <div className="text-2xl font-bold text-blue-600">
+                  {getTotalEntitiesCount()}
+                </div>
                 <div className="text-gray-600">Entità Totali</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{getTotalTriplesCount()}</div>
+                <div className="text-2xl font-bold text-green-600">
+                  {getTotalTriplesCount()}
+                </div>
                 <div className="text-gray-600">Triple Semantiche</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{getItalianEntitiesCount()}</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {getItalianEntitiesCount()}
+                </div>
                 <div className="text-gray-600">Entità Italiane</div>
               </div>
             </div>
@@ -210,12 +234,14 @@ const ExportModal: React.FC<ExportModalProps> = ({
 
           {/* Export format selection */}
           <div className="mb-6">
-            <h4 className="font-medium text-gray-900 mb-3">Formati di Esportazione:</h4>
+            <h4 className="font-medium text-gray-900 mb-3">
+              Formati di Esportazione:
+            </h4>
             <div className="space-y-3">
-              {exportOptions.map((option) => {
+              {exportOptions.map(option => {
                 const Icon = option.icon;
                 const isSelected = selectedFormats.has(option.format);
-                
+
                 return (
                   <div
                     key={option.format}
@@ -238,12 +264,16 @@ const ExportModal: React.FC<ExportModalProps> = ({
                       <div className="ml-3 flex-1">
                         <div className="flex items-center">
                           <Icon className="w-4 h-4 mr-2 text-gray-600" />
-                          <span className="font-medium text-gray-900">{option.label}</span>
+                          <span className="font-medium text-gray-900">
+                            {option.label}
+                          </span>
                           <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
                             .{option.extension}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 mt-1">{option.description}</p>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {option.description}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -254,17 +284,20 @@ const ExportModal: React.FC<ExportModalProps> = ({
 
           {/* Export options */}
           <div className="mb-6">
-            <h4 className="font-medium text-gray-900 mb-3">Opzioni di Esportazione:</h4>
+            <h4 className="font-medium text-gray-900 mb-3">
+              Opzioni di Esportazione:
+            </h4>
             <div className="space-y-3">
               <label className="flex items-center">
                 <input
                   type="checkbox"
                   checked={includeMetadata}
-                  onChange={(e) => setIncludeMetadata(e.target.checked)}
+                  onChange={e => setIncludeMetadata(e.target.checked)}
                   className="form-checkbox h-4 w-4 text-italian-green rounded border-gray-300 focus:ring-italian-green"
                 />
                 <span className="ml-2 text-sm text-gray-700">
-                  Include metadati entità (coordinate, regioni, contesto culturale)
+                  Include metadati entità (coordinate, regioni, contesto
+                  culturale)
                 </span>
               </label>
 
@@ -273,7 +306,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                   <input
                     type="checkbox"
                     checked={includeAnalytics}
-                    onChange={(e) => setIncludeAnalytics(e.target.checked)}
+                    onChange={e => setIncludeAnalytics(e.target.checked)}
                     className="form-checkbox h-4 w-4 text-italian-green rounded border-gray-300 focus:ring-italian-green"
                   />
                   <span className="ml-2 text-sm text-gray-700">
@@ -286,7 +319,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
                 <input
                   type="checkbox"
                   checked={includeItalianContext}
-                  onChange={(e) => setIncludeItalianContext(e.target.checked)}
+                  onChange={e => setIncludeItalianContext(e.target.checked)}
                   className="form-checkbox h-4 w-4 text-italian-green rounded border-gray-300 focus:ring-italian-green"
                 />
                 <span className="ml-2 text-sm text-gray-700">
@@ -299,10 +332,10 @@ const ExportModal: React.FC<ExportModalProps> = ({
           {/* Export preview */}
           <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="text-sm">
-              <span className="font-medium text-blue-800">Anteprima esportazione:</span>
-              <div className="mt-1 text-blue-700">
-                {getFilePreview()}
-              </div>
+              <span className="font-medium text-blue-800">
+                Anteprima esportazione:
+              </span>
+              <div className="mt-1 text-blue-700">{getFilePreview()}</div>
             </div>
           </div>
 
@@ -329,7 +362,7 @@ const ExportModal: React.FC<ExportModalProps> = ({
             >
               Annulla
             </button>
-            
+
             <button
               onClick={handleExport}
               disabled={selectedFormats.size === 0 || isExporting}
@@ -343,7 +376,8 @@ const ExportModal: React.FC<ExportModalProps> = ({
               ) : (
                 <>
                   <Download className="w-4 h-4 mr-2" />
-                  Esporta {selectedFormats.size > 0 ? `(${selectedFormats.size})` : ''}
+                  Esporta{' '}
+                  {selectedFormats.size > 0 ? `(${selectedFormats.size})` : ''}
                 </>
               )}
             </button>
