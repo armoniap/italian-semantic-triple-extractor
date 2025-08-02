@@ -120,7 +120,7 @@ const InputSection: React.FC = () => {
     const isItalian = confidence > 0.3;
     
     return { isItalian, confidence, indicators: [...new Set(indicators)] };
-  }, [text]);
+  }, [text, wordCount]);
   
   // Italian cultural context suggestions
   const italianSuggestions = useMemo(() => {

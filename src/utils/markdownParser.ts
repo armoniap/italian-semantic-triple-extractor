@@ -123,7 +123,7 @@ export class MarkdownParser {
     const rawHtml = marked(markdown) as string;
     
     // Add Italian language attributes
-    let italianHtml = rawHtml.replace(/<html/g, '<html lang="it"');
+    const italianHtml = rawHtml.replace(/<html/g, '<html lang="it"');
     
     // Sanitize HTML for security with Italian-specific considerations
     const sanitizedHtml = DOMPurify.sanitize(italianHtml, {
@@ -278,7 +278,7 @@ export class MarkdownParser {
   // Italian-specific enhancement methods
   private static normalizeItalianText(text: string): string {
     // Normalize Italian-specific characters and encoding
-    let normalized = text
+    const normalized = text
       .replace(/[\u2018\u2019]/g, "'") // Curly apostrophes to straight
       .replace(/[\u201c\u201d]/g, '"') // Curly quotes to straight
       .replace(/[\u2013\u2014]/g, '-') // En/Em dashes to hyphens

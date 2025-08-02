@@ -481,6 +481,7 @@ export class SecureStorage {
   private static decompressData(data: any): any {
     if (data._compressed) {
       // Remove compression flags
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _compressed, _originalSize, ...decompressed } = data;
       return decompressed;
     }
