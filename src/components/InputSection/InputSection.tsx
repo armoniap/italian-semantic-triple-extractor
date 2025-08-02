@@ -79,6 +79,9 @@ const InputSection: React.FC = () => {
     clearResults();
   }, [clearResults]);
 
+  // Word count calculation
+  const wordCount = text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  
   // Italian language detection and validation
   const italianAnalysis = useMemo(() => {
     if (!text.trim()) return { isItalian: false, confidence: 0, indicators: [] };
@@ -167,7 +170,6 @@ const InputSection: React.FC = () => {
   
   // Analyze markdown structure if present
   const isMarkdown = text.includes('#') || text.includes('[') || text.includes('```');
-  const wordCount = text.trim().split(/\s+/).filter(word => word.length > 0).length;
   const estimatedTime = Math.ceil(wordCount / 200); // Reading time estimation
 
   return (
