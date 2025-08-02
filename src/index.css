@@ -1,0 +1,334 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Italian-themed styles */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  /* Entity highlighting styles */
+  .entity-highlight {
+    @apply px-1 py-0.5 rounded text-white font-medium cursor-pointer transition-all duration-200;
+  }
+  
+  .entity-highlight:hover {
+    @apply shadow-md transform scale-105;
+  }
+  
+  .entity-person {
+    @apply bg-entity-person;
+  }
+  
+  .entity-organization {
+    @apply bg-entity-organization;
+  }
+  
+  .entity-location {
+    @apply bg-entity-location;
+  }
+  
+  .entity-date {
+    @apply bg-entity-date;
+  }
+  
+  .entity-monetary {
+    @apply bg-entity-monetary;
+  }
+  
+  .entity-event {
+    @apply bg-entity-event;
+  }
+  
+  /* Italian flag accent */
+  .italian-accent {
+    background: linear-gradient(90deg, #009246 33%, #F1F2F6 33% 66%, #CE2B37 66%);
+  }
+  
+  /* Loading animation */
+  .loading-pulse {
+    @apply animate-pulse-slow;
+  }
+  
+  /* Triple graph styles */
+  .triple-node {
+    @apply cursor-pointer transition-all duration-200;
+  }
+  
+  .triple-node:hover {
+    @apply transform scale-110;
+  }
+  
+  .triple-edge {
+    @apply transition-all duration-200;
+  }
+  
+  .triple-edge:hover {
+    @apply stroke-2;
+  }
+  
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-gray-100 rounded;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 rounded hover:bg-gray-400;
+  }
+  
+  /* Card styles */
+  .glass-card {
+    @apply backdrop-blur-sm bg-white/90 border border-white/20 shadow-lg;
+  }
+  
+  /* Button variants */
+  .btn-primary {
+    @apply bg-italian-green hover:bg-green-600 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-500 hover:bg-gray-600 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-danger {
+    @apply bg-italian-red hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200;
+  }
+  
+  /* Form styles */
+  .form-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-italian-green focus:border-transparent transition-all duration-200;
+  }
+  
+  .form-textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-italian-green focus:border-transparent transition-all duration-200 resize-y;
+  }
+  
+  /* Enhanced responsive styles for mobile/tablet */
+  @media (max-width: 768px) {
+    .container {
+      @apply px-4;
+    }
+    
+    .btn-primary,
+    .btn-secondary,
+    .btn-danger {
+      @apply text-sm px-3 py-2;
+    }
+    
+    .entity-highlight {
+      @apply px-1 py-0.5 text-xs;
+    }
+    
+    .form-input,
+    .form-textarea {
+      @apply text-sm;
+    }
+    
+    /* Mobile-optimized graph */
+    .triple-node {
+      @apply scale-90;
+    }
+    
+    .triple-edge {
+      @apply stroke-1;
+    }
+    
+    /* Mobile sidebar */
+    .sidebar-mobile {
+      @apply fixed inset-0 z-50 lg:relative lg:inset-auto;
+    }
+    
+    /* Mobile navigation */
+    .nav-mobile {
+      @apply flex-col space-y-2 space-x-0;
+    }
+  }
+  
+  /* Tablet optimizations */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .grid-tablet {
+      @apply grid-cols-2;
+    }
+    
+    .text-tablet {
+      @apply text-base;
+    }
+  }
+  
+  /* Enhanced Italian flag theme integration */
+  .italian-gradient {
+    background: linear-gradient(135deg, #009246 0%, #F1F2F6 50%, #CE2B37 100%);
+  }
+  
+  .italian-border {
+    border-image: linear-gradient(90deg, #009246, #F1F2F6, #CE2B37) 1;
+  }
+  
+  .italian-text-gradient {
+    background: linear-gradient(135deg, #009246, #CE2B37);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Italian flag animation */
+  @keyframes italian-wave {
+    0%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-2px); }
+    75% { transform: translateY(2px); }
+  }
+  
+  .italian-wave {
+    animation: italian-wave 3s ease-in-out infinite;
+  }
+  
+  /* Enhanced entity colors for Italian context */
+  .entity-italian-city {
+    @apply bg-green-600 text-white;
+  }
+  
+  .entity-italian-region {
+    @apply bg-emerald-600 text-white;
+  }
+  
+  .entity-italian-monument {
+    @apply bg-amber-600 text-white;
+  }
+  
+  .entity-italian-cuisine {
+    @apply bg-orange-500 text-white;
+  }
+  
+  .entity-italian-historical {
+    @apply bg-purple-600 text-white;
+  }
+  
+  /* Italian-themed loading animation */
+  @keyframes italian-loading {
+    0% { border-color: #009246; }
+    33% { border-color: #F1F2F6; }
+    66% { border-color: #CE2B37; }
+    100% { border-color: #009246; }
+  }
+  
+  .loading-italian {
+    animation: italian-loading 1.5s linear infinite;
+    border-width: 3px;
+    border-style: solid;
+  }
+  
+  /* Enhanced graph tooltips */
+  .graph-tooltip {
+    backdrop-filter: blur(8px);
+    @apply shadow-2xl;
+  }
+  
+  /* Italian context highlights */
+  .italian-context {
+    @apply bg-gradient-to-r from-green-50 via-white to-red-50 border-l-4 border-italian-green;
+  }
+  
+  /* Enhanced focus states for accessibility */
+  .form-input:focus,
+  .form-textarea:focus {
+    @apply ring-2 ring-italian-green ring-opacity-50 border-italian-green;
+  }
+  
+  button:focus {
+    @apply ring-2 ring-italian-green ring-opacity-50 outline-none;
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .entity-highlight {
+      @apply border-2 border-black;
+    }
+    
+    .btn-primary {
+      @apply border-2 border-black;
+    }
+    
+    .italian-accent {
+      @apply border-t-4 border-black;
+    }
+  }
+  
+  /* Print styles */
+  @media print {
+    .no-print {
+      @apply hidden;
+    }
+    
+    .entity-highlight {
+      @apply border border-gray-400 bg-transparent text-black;
+    }
+    
+    .italian-accent {
+      @apply border-t border-gray-400;
+    }
+  }
+  
+  /* Dark mode support with Italian theming */
+  @media (prefers-color-scheme: dark) {
+    body {
+      @apply bg-gray-900 text-gray-100;
+    }
+    
+    .glass-card {
+      @apply backdrop-blur-sm bg-gray-800/90 border border-gray-700/20;
+    }
+    
+    .form-input,
+    .form-textarea {
+      @apply bg-gray-800 border-gray-600 text-gray-100 focus:ring-italian-green;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+      @apply bg-gray-800;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      @apply bg-gray-600 hover:bg-gray-500;
+    }
+    
+    .italian-context {
+      @apply bg-gradient-to-r from-green-900/20 via-gray-800 to-red-900/20;
+    }
+    
+    .entity-highlight {
+      @apply shadow-lg;
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .entity-highlight {
+      @apply transition-none;
+    }
+    
+    .triple-node,
+    .triple-edge {
+      @apply transition-none;
+    }
+    
+    .italian-wave {
+      animation: none;
+    }
+    
+    .loading-italian {
+      animation: none;
+      @apply border-italian-green;
+    }
+  }
+}
