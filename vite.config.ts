@@ -5,7 +5,7 @@ import { resolve } from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/italian-semantic-triple-extractor/', // GitHub Pages base path
+  base: './', // Relative paths for GitHub Pages
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
