@@ -225,10 +225,10 @@ const InputSection: React.FC = () => {
   const estimatedTime = Math.ceil(wordCount / 200); // Reading time estimation
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
           <Globe className="w-5 h-5 mr-2 text-italian-green" />
           Inserisci Testo Italiano
         </h3>
@@ -238,8 +238,8 @@ const InputSection: React.FC = () => {
             <div
               className={`flex items-center space-x-1 px-2 py-1 text-xs rounded ${
                 italianAnalysis.isItalian
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-yellow-100 text-yellow-800'
+                  ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+                  : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300'
               }`}
             >
               {italianAnalysis.isItalian ? (
@@ -255,13 +255,13 @@ const InputSection: React.FC = () => {
           )}
 
           {isMarkdown && (
-            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+            <span className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded">
               Markdown
             </span>
           )}
 
           {wordCount > 0 && (
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               {wordCount} parole • {estimatedTime} min
             </span>
           )}
@@ -270,16 +270,16 @@ const InputSection: React.FC = () => {
 
       {/* Italian analysis details */}
       {text.trim() && italianAnalysis.indicators.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
           <div className="text-sm">
-            <span className="font-medium text-blue-800">
+            <span className="font-medium text-blue-800 dark:text-blue-200">
               Indicatori italiani rilevati:
             </span>
             <div className="flex flex-wrap gap-1 mt-1">
               {italianAnalysis.indicators.map((indicator, index) => (
                 <span
                   key={index}
-                  className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded"
+                  className="px-2 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200 text-xs rounded"
                 >
                   {indicator}
                 </span>
@@ -291,23 +291,26 @@ const InputSection: React.FC = () => {
 
       {/* Cultural context suggestions */}
       {italianSuggestions.length > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
           <div className="flex items-start">
-            <Lightbulb className="w-4 h-4 text-yellow-600 mt-0.5 mr-2 flex-shrink-0" />
+            <Lightbulb className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-2 flex-shrink-0" />
             <div className="text-sm">
-              <div className="font-medium text-yellow-800 mb-2">
+              <div className="font-medium text-yellow-800 dark:text-yellow-200 mb-2">
                 Suggerimenti per arricchire il contesto italiano:
               </div>
               <div className="space-y-1">
                 {italianSuggestions.map((suggestion, index) => (
-                  <div key={index} className="text-yellow-700 text-xs">
+                  <div
+                    key={index}
+                    className="text-yellow-700 dark:text-yellow-300 text-xs"
+                  >
                     {suggestion}
                   </div>
                 ))}
               </div>
               <button
                 onClick={() => setShowSuggestions(!showSuggestions)}
-                className="text-xs text-yellow-600 hover:text-yellow-700 mt-1 underline"
+                className="text-xs text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 mt-1 underline"
               >
                 {showSuggestions ? 'Nascondi' : 'Mostra'} tutti i suggerimenti
               </button>
@@ -320,18 +323,18 @@ const InputSection: React.FC = () => {
       <div
         className={`border-2 border-dashed rounded-lg p-6 transition-colors ${
           dragOver
-            ? 'border-italian-green bg-green-50'
-            : 'border-gray-300 hover:border-gray-400'
+            ? 'border-italian-green bg-green-50 dark:bg-green-900/20'
+            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
         }`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
       >
         <div className="text-center">
-          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+          <Upload className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
           <div className="mt-4">
             <label htmlFor="file-upload" className="cursor-pointer">
-              <span className="mt-2 block text-sm font-medium text-gray-900">
+              <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
                 Trascina un file Markdown o
                 <span className="text-italian-green"> sfoglia</span>
               </span>
@@ -345,7 +348,7 @@ const InputSection: React.FC = () => {
               onChange={handleFileInputChange}
             />
           </div>
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Formati supportati: .md, .txt
           </p>
         </div>
@@ -355,7 +358,7 @@ const InputSection: React.FC = () => {
       <div className="space-y-2">
         <label
           htmlFor="text-input"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
         >
           Testo da Analizzare
         </label>
@@ -381,10 +384,14 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
       {isAnalyzing && (
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Analisi in corso...</span>
-            <span className="text-gray-600">{analysisProgress}%</span>
+            <span className="text-gray-600 dark:text-gray-400">
+              Analisi in corso...
+            </span>
+            <span className="text-gray-600 dark:text-gray-400">
+              {analysisProgress}%
+            </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div
               className="bg-italian-green h-2 rounded-full transition-all duration-300"
               style={{ width: `${analysisProgress}%` }}
@@ -397,7 +404,7 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
       <div className="flex items-center justify-between">
         <button
           onClick={handleClear}
-          className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+          className="flex items-center space-x-2 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
           disabled={isAnalyzing}
         >
           <Trash2 className="w-4 h-4" />
@@ -406,7 +413,9 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
 
         <div className="flex items-center space-x-3">
           {text && (
-            <div className="text-sm text-gray-500">{text.length} caratteri</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              {text.length} caratteri
+            </div>
           )}
 
           <button
@@ -421,14 +430,14 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
       </div>
 
       {/* Enhanced help text with Italian examples */}
-      <div className="text-sm text-gray-600 bg-gray-50 p-4 rounded-lg">
+      <div className="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
         <h4 className="font-medium mb-2 flex items-center">
           <span className="text-lg mr-2">🇮🇹</span>
           Suggerimenti per un'analisi ottimale:
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <h5 className="font-medium text-gray-800 mb-1">
+            <h5 className="font-medium text-gray-800 dark:text-gray-200 mb-1">
               Contenuto ideale:
             </h5>
             <ul className="space-y-1 text-sm">
@@ -440,7 +449,9 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
             </ul>
           </div>
           <div>
-            <h5 className="font-medium text-gray-800 mb-1">Esempi efficaci:</h5>
+            <h5 className="font-medium text-gray-800 dark:text-gray-200 mb-1">
+              Esempi efficaci:
+            </h5>
             <ul className="space-y-1 text-sm">
               <li>• "Leonardo da Vinci nacque a Vinci nel 1452"</li>
               <li>• "Il Colosseo si trova nel centro di Roma"</li>
@@ -450,8 +461,8 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
             </ul>
           </div>
         </div>
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <p className="text-xs text-gray-500">
+        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             <strong>Nota:</strong> Il sistema è ottimizzato per l'italiano e
             riconosce dialetti regionali, nomi storici, geografia italiana e
             relazioni culturali specifiche.

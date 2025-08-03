@@ -26,88 +26,97 @@ const EntityHighlighter: React.FC<EntityHighlighterProps> = ({
   const { selectEntity } = useApplication();
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
 
-  // Italian-specific entity type styling with better contrast
-  const getItalianEntityStyle = (entity: ItalianEntity): string => {
+  // Completely redesigned entity styling for dark theme
+  const getModernEntityStyle = (entity: ItalianEntity): string => {
     const baseClasses =
-      'px-2 py-1 rounded-md font-medium cursor-pointer transition-all duration-200 hover:shadow-md border';
+      'inline-flex items-center px-2 py-1 mx-0.5 my-0.5 rounded-md text-sm font-medium cursor-pointer transition-all duration-200 hover:scale-105 border';
 
+    // Modern, accessible color scheme that works in both light and dark
     const typeStyles: Record<string, string> = {
+      // People - Blue family
       [ItalianEntityType.PERSON]:
-        'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 dark:bg-blue-200 dark:text-blue-900 dark:border-blue-300',
+        'bg-blue-500/10 text-blue-700 border-blue-500/20 hover:bg-blue-500/20 dark:bg-blue-400/20 dark:text-blue-300 dark:border-blue-400/30 dark:hover:bg-blue-400/30',
       [ItalianEntityType.HISTORICAL_FIGURE]:
-        'bg-indigo-100 text-indigo-800 border-indigo-200 hover:bg-indigo-200 dark:bg-indigo-200 dark:text-indigo-900 dark:border-indigo-300',
+        'bg-indigo-500/10 text-indigo-700 border-indigo-500/20 hover:bg-indigo-500/20 dark:bg-indigo-400/20 dark:text-indigo-300 dark:border-indigo-400/30 dark:hover:bg-indigo-400/30',
       [ItalianEntityType.POLITICIAN]:
-        'bg-red-100 text-red-800 border-red-200 hover:bg-red-200 dark:bg-red-200 dark:text-red-900 dark:border-red-300',
+        'bg-red-500/10 text-red-700 border-red-500/20 hover:bg-red-500/20 dark:bg-red-400/20 dark:text-red-300 dark:border-red-400/30 dark:hover:bg-red-400/30',
       [ItalianEntityType.ARTIST]:
-        'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200 dark:bg-purple-200 dark:text-purple-900 dark:border-purple-300',
+        'bg-purple-500/10 text-purple-700 border-purple-500/20 hover:bg-purple-500/20 dark:bg-purple-400/20 dark:text-purple-300 dark:border-purple-400/30 dark:hover:bg-purple-400/30',
       [ItalianEntityType.WRITER]:
-        'bg-pink-100 text-pink-800 border-pink-200 hover:bg-pink-200 dark:bg-pink-200 dark:text-pink-900 dark:border-pink-300',
+        'bg-pink-500/10 text-pink-700 border-pink-500/20 hover:bg-pink-500/20 dark:bg-pink-400/20 dark:text-pink-300 dark:border-pink-400/30 dark:hover:bg-pink-400/30',
 
+      // Places - Green family
       [ItalianEntityType.ITALIAN_CITY]:
-        'bg-green-100 text-green-800 border-green-200 hover:bg-green-200 dark:bg-green-200 dark:text-green-900 dark:border-green-300',
+        'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 hover:bg-emerald-500/20 dark:bg-emerald-400/20 dark:text-emerald-300 dark:border-emerald-400/30 dark:hover:bg-emerald-400/30',
       [ItalianEntityType.ITALIAN_REGION]:
-        'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200 dark:bg-emerald-200 dark:text-emerald-900 dark:border-emerald-300',
+        'bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20 dark:bg-green-400/20 dark:text-green-300 dark:border-green-400/30 dark:hover:bg-green-400/30',
       [ItalianEntityType.ITALIAN_PROVINCE]:
-        'bg-teal-100 text-teal-800 border-teal-200 hover:bg-teal-200 dark:bg-teal-200 dark:text-teal-900 dark:border-teal-300',
+        'bg-teal-500/10 text-teal-700 border-teal-500/20 hover:bg-teal-500/20 dark:bg-teal-400/20 dark:text-teal-300 dark:border-teal-400/30 dark:hover:bg-teal-400/30',
       [ItalianEntityType.LOCATION]:
-        'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-200 dark:text-green-900 dark:border-green-300',
+        'bg-lime-500/10 text-lime-700 border-lime-500/20 hover:bg-lime-500/20 dark:bg-lime-400/20 dark:text-lime-300 dark:border-lime-400/30 dark:hover:bg-lime-400/30',
       [ItalianEntityType.MONUMENT]:
-        'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200 dark:bg-amber-200 dark:text-amber-900 dark:border-amber-300',
+        'bg-amber-500/10 text-amber-700 border-amber-500/20 hover:bg-amber-500/20 dark:bg-amber-400/20 dark:text-amber-300 dark:border-amber-400/30 dark:hover:bg-amber-400/30',
       [ItalianEntityType.LANDMARK]:
-        'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-300',
+        'bg-orange-500/10 text-orange-700 border-orange-500/20 hover:bg-orange-500/20 dark:bg-orange-400/20 dark:text-orange-300 dark:border-orange-400/30 dark:hover:bg-orange-400/30',
       [ItalianEntityType.PIAZZA]:
-        'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 dark:bg-yellow-200 dark:text-yellow-900 dark:border-yellow-300',
+        'bg-yellow-500/10 text-yellow-700 border-yellow-500/20 hover:bg-yellow-500/20 dark:bg-yellow-400/20 dark:text-yellow-300 dark:border-yellow-400/30 dark:hover:bg-yellow-400/30',
 
+      // Organizations - Purple/Violet family
       [ItalianEntityType.ORGANIZATION]:
-        'bg-violet-100 text-violet-800 border-violet-200 hover:bg-violet-200 dark:bg-violet-200 dark:text-violet-900 dark:border-violet-300',
+        'bg-violet-500/10 text-violet-700 border-violet-500/20 hover:bg-violet-500/20 dark:bg-violet-400/20 dark:text-violet-300 dark:border-violet-400/30 dark:hover:bg-violet-400/30',
       [ItalianEntityType.COMPANY]:
-        'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200 dark:bg-cyan-200 dark:text-cyan-900 dark:border-cyan-300',
+        'bg-cyan-500/10 text-cyan-700 border-cyan-500/20 hover:bg-cyan-500/20 dark:bg-cyan-400/20 dark:text-cyan-300 dark:border-cyan-400/30 dark:hover:bg-cyan-400/30',
       [ItalianEntityType.INSTITUTION]:
-        'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200 dark:bg-slate-300 dark:text-slate-900 dark:border-slate-400',
+        'bg-slate-500/10 text-slate-700 border-slate-500/20 hover:bg-slate-500/20 dark:bg-slate-400/20 dark:text-slate-300 dark:border-slate-400/30 dark:hover:bg-slate-400/30',
       [ItalianEntityType.POLITICAL_PARTY]:
-        'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200 dark:bg-rose-200 dark:text-rose-900 dark:border-rose-300',
+        'bg-rose-500/10 text-rose-700 border-rose-500/20 hover:bg-rose-500/20 dark:bg-rose-400/20 dark:text-rose-300 dark:border-rose-400/30 dark:hover:bg-rose-400/30',
       [ItalianEntityType.UNIVERSITY]:
-        'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-200 dark:text-blue-900 dark:border-blue-300',
+        'bg-sky-500/10 text-sky-700 border-sky-500/20 hover:bg-sky-500/20 dark:bg-sky-400/20 dark:text-sky-300 dark:border-sky-400/30 dark:hover:bg-sky-400/30',
       [ItalianEntityType.MUSEUM]:
-        'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-200 dark:text-purple-900 dark:border-purple-300',
+        'bg-fuchsia-500/10 text-fuchsia-700 border-fuchsia-500/20 hover:bg-fuchsia-500/20 dark:bg-fuchsia-400/20 dark:text-fuchsia-300 dark:border-fuchsia-400/30 dark:hover:bg-fuchsia-400/30',
 
+      // Time/Events - Orange family
       [ItalianEntityType.DATE]:
-        'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-300',
+        'bg-orange-500/10 text-orange-700 border-orange-500/20 hover:bg-orange-500/20 dark:bg-orange-400/20 dark:text-orange-300 dark:border-orange-400/30 dark:hover:bg-orange-400/30',
       [ItalianEntityType.TIME]:
-        'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-200 dark:text-amber-900 dark:border-amber-300',
+        'bg-amber-500/10 text-amber-700 border-amber-500/20 hover:bg-amber-500/20 dark:bg-amber-400/20 dark:text-amber-300 dark:border-amber-400/30 dark:hover:bg-amber-400/30',
       [ItalianEntityType.PERIOD]:
-        'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 dark:bg-yellow-200 dark:text-yellow-900 dark:border-yellow-300',
+        'bg-yellow-500/10 text-yellow-700 border-yellow-500/20 hover:bg-yellow-500/20 dark:bg-yellow-400/20 dark:text-yellow-300 dark:border-yellow-400/30 dark:hover:bg-yellow-400/30',
       [ItalianEntityType.ITALIAN_HOLIDAY]:
-        'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-200 dark:text-red-900 dark:border-red-300',
+        'bg-red-500/10 text-red-700 border-red-500/20 hover:bg-red-500/20 dark:bg-red-400/20 dark:text-red-300 dark:border-red-400/30 dark:hover:bg-red-400/30',
       [ItalianEntityType.HISTORICAL_EVENT]:
-        'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-200 dark:text-indigo-900 dark:border-indigo-300',
+        'bg-indigo-500/10 text-indigo-700 border-indigo-500/20 hover:bg-indigo-500/20 dark:bg-indigo-400/20 dark:text-indigo-300 dark:border-indigo-400/30 dark:hover:bg-indigo-400/30',
 
+      // Culture - Pink/Purple family
       [ItalianEntityType.CULTURAL_EVENT]:
-        'bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100 dark:bg-pink-200 dark:text-pink-900 dark:border-pink-300',
+        'bg-pink-500/10 text-pink-700 border-pink-500/20 hover:bg-pink-500/20 dark:bg-pink-400/20 dark:text-pink-300 dark:border-pink-400/30 dark:hover:bg-pink-400/30',
       [ItalianEntityType.FESTIVAL]:
-        'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200 hover:bg-fuchsia-200 dark:bg-fuchsia-200 dark:text-fuchsia-900 dark:border-fuchsia-300',
+        'bg-fuchsia-500/10 text-fuchsia-700 border-fuchsia-500/20 hover:bg-fuchsia-500/20 dark:bg-fuchsia-400/20 dark:text-fuchsia-300 dark:border-fuchsia-400/30 dark:hover:bg-fuchsia-400/30',
       [ItalianEntityType.TRADITION]:
-        'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-200 dark:text-emerald-900 dark:border-emerald-300',
+        'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 hover:bg-emerald-500/20 dark:bg-emerald-400/20 dark:text-emerald-300 dark:border-emerald-400/30 dark:hover:bg-emerald-400/30',
       [ItalianEntityType.CUISINE]:
-        'bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-300',
+        'bg-orange-500/10 text-orange-700 border-orange-500/20 hover:bg-orange-500/20 dark:bg-orange-400/20 dark:text-orange-300 dark:border-orange-400/30 dark:hover:bg-orange-400/30',
 
+      // Commercial - Gray family
       [ItalianEntityType.ITALIAN_BRAND]:
-        'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 dark:bg-gray-300 dark:text-gray-900 dark:border-gray-400',
+        'bg-gray-500/10 text-gray-700 border-gray-500/20 hover:bg-gray-500/20 dark:bg-gray-400/20 dark:text-gray-300 dark:border-gray-400/30 dark:hover:bg-gray-400/30',
       [ItalianEntityType.ITALIAN_PRODUCT]:
-        'bg-stone-100 text-stone-800 border-stone-200 hover:bg-stone-200 dark:bg-stone-300 dark:text-stone-900 dark:border-stone-400',
+        'bg-stone-500/10 text-stone-700 border-stone-500/20 hover:bg-stone-500/20 dark:bg-stone-400/20 dark:text-stone-300 dark:border-stone-400/30 dark:hover:bg-stone-400/30',
 
+      // Numbers - Blue/Green family
       [ItalianEntityType.MONETARY]:
-        'bg-green-100 text-green-800 border-green-300 hover:bg-green-200 dark:bg-green-300 dark:text-green-900 dark:border-green-400',
+        'bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20 dark:bg-green-400/20 dark:text-green-300 dark:border-green-400/30 dark:hover:bg-green-400/30',
       [ItalianEntityType.PERCENTAGE]:
-        'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 dark:bg-blue-200 dark:text-blue-900 dark:border-blue-300',
+        'bg-blue-500/10 text-blue-700 border-blue-500/20 hover:bg-blue-500/20 dark:bg-blue-400/20 dark:text-blue-300 dark:border-blue-400/30 dark:hover:bg-blue-400/30',
       [ItalianEntityType.NUMBER]:
-        'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-300 dark:text-gray-900 dark:border-gray-400',
+        'bg-slate-500/10 text-slate-700 border-slate-500/20 hover:bg-slate-500/20 dark:bg-slate-400/20 dark:text-slate-300 dark:border-slate-400/30 dark:hover:bg-slate-400/30',
 
+      // Misc
       [ItalianEntityType.MISCELLANEOUS]:
-        'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 dark:bg-slate-300 dark:text-slate-900 dark:border-slate-400',
+        'bg-neutral-500/10 text-neutral-700 border-neutral-500/20 hover:bg-neutral-500/20 dark:bg-neutral-400/20 dark:text-neutral-300 dark:border-neutral-400/30 dark:hover:bg-neutral-400/30',
     };
 
-    return `${baseClasses} ${typeStyles[entity.type] || 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-300 dark:text-gray-900 dark:border-gray-400'}`;
+    return `${baseClasses} ${typeStyles[entity.type] || 'bg-gray-500/10 text-gray-700 border-gray-500/20 hover:bg-gray-500/20 dark:bg-gray-400/20 dark:text-gray-300 dark:border-gray-400/30 dark:hover:bg-gray-400/30'}`;
   };
 
   // Get Italian label for entity type
@@ -213,14 +222,14 @@ const EntityHighlighter: React.FC<EntityHighlighterProps> = ({
 
   if (!highlightMode || entities.length === 0) {
     return (
-      <div className="whitespace-pre-wrap leading-relaxed font-mono text-sm text-gray-900 dark:text-gray-100">
+      <div className="whitespace-pre-wrap leading-loose font-mono text-sm text-gray-900 dark:text-gray-100">
         {text}
       </div>
     );
   }
 
   return (
-    <div className="whitespace-pre-wrap leading-relaxed font-mono text-sm text-gray-900 dark:text-gray-100 relative">
+    <div className="whitespace-pre-wrap leading-loose font-mono text-sm text-gray-900 dark:text-gray-100 relative">
       {segments.map((segment, index) => {
         if (!segment.isEntity) {
           return <span key={index}>{segment.text}</span>;
@@ -232,7 +241,7 @@ const EntityHighlighter: React.FC<EntityHighlighterProps> = ({
         return (
           <span key={index} className="relative inline-block">
             <span
-              className={getItalianEntityStyle(entity)}
+              className={getModernEntityStyle(entity)}
               onClick={() => handleEntityClick(entity)}
               onMouseEnter={() => setHoveredEntity(entity.id)}
               onMouseLeave={() => setHoveredEntity(null)}
@@ -242,77 +251,90 @@ const EntityHighlighter: React.FC<EntityHighlighterProps> = ({
               {segment.text}
             </span>
 
-            {/* Italian tooltip */}
+            {/* Modern tooltip */}
             {showTooltips && isHovered && (
-              <div className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg min-w-48 max-w-64">
-                <div className="font-semibold mb-1">{entity.text}</div>
-                <div className="text-gray-300 mb-2">
-                  {getItalianEntityLabel(entity.type)}
-                </div>
+              <div className="absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-xl min-w-64 max-w-80">
+                <div className="space-y-3">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold text-gray-900 dark:text-white text-sm">
+                      {entity.text}
+                    </div>
+                    <div className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-full">
+                      {Math.round(entity.confidence * 100)}%
+                    </div>
+                  </div>
 
-                {/* Confidence */}
-                <div className="text-gray-400 text-xs mb-2">
-                  Confidenza: {Math.round(entity.confidence * 100)}%
-                </div>
+                  {/* Type */}
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    {getItalianEntityLabel(entity.type)}
+                  </div>
 
-                {/* Italian metadata */}
-                {entity.metadata && (
-                  <div className="space-y-1 text-xs">
-                    {entity.metadata.region && (
-                      <div className="text-green-300">
-                        📍 {entity.metadata.region}
-                      </div>
-                    )}
-                    {entity.metadata.culturalContext && (
-                      <div className="text-blue-300">
-                        🏛️ {entity.metadata.culturalContext}
-                      </div>
-                    )}
-                    {entity.metadata.historicalPeriod && (
-                      <div className="text-purple-300">
-                        📅 {entity.metadata.historicalPeriod}
-                      </div>
-                    )}
-                    {entity.metadata.dialectalVariants &&
-                      entity.metadata.dialectalVariants.length > 0 && (
-                        <div className="text-yellow-300">
-                          🗣️ Varianti:{' '}
-                          {entity.metadata.dialectalVariants.join(', ')}
+                  {/* Italian metadata */}
+                  {entity.metadata && (
+                    <div className="space-y-2 text-xs">
+                      {entity.metadata.region && (
+                        <div className="flex items-center text-green-600 dark:text-green-400">
+                          <span className="mr-1">📍</span>
+                          <span>{entity.metadata.region}</span>
                         </div>
                       )}
-                  </div>
-                )}
+                      {entity.metadata.culturalContext && (
+                        <div className="flex items-center text-blue-600 dark:text-blue-400">
+                          <span className="mr-1">🏛️</span>
+                          <span>{entity.metadata.culturalContext}</span>
+                        </div>
+                      )}
+                      {entity.metadata.historicalPeriod && (
+                        <div className="flex items-center text-purple-600 dark:text-purple-400">
+                          <span className="mr-1">📅</span>
+                          <span>{entity.metadata.historicalPeriod}</span>
+                        </div>
+                      )}
+                      {entity.metadata.dialectalVariants &&
+                        entity.metadata.dialectalVariants.length > 0 && (
+                          <div className="flex items-center text-yellow-600 dark:text-yellow-400">
+                            <span className="mr-1">🗣️</span>
+                            <span>
+                              Varianti:{' '}
+                              {entity.metadata.dialectalVariants.join(', ')}
+                            </span>
+                          </div>
+                        )}
+                    </div>
+                  )}
 
-                {/* External links */}
-                {(entity.wikipediaUrl || entity.dbpediaUrl) && (
-                  <div className="mt-2 pt-2 border-t border-gray-700 space-x-2">
-                    {entity.wikipediaUrl && (
-                      <a
-                        href={entity.wikipediaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 text-xs"
-                        onClick={e => e.stopPropagation()}
-                      >
-                        Wikipedia
-                      </a>
-                    )}
-                    {entity.dbpediaUrl && (
-                      <a
-                        href={entity.dbpediaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 text-xs"
-                        onClick={e => e.stopPropagation()}
-                      >
-                        DBpedia
-                      </a>
-                    )}
-                  </div>
-                )}
+                  {/* External links */}
+                  {(entity.wikipediaUrl || entity.dbpediaUrl) && (
+                    <div className="pt-3 border-t border-gray-200 dark:border-gray-600 flex space-x-3">
+                      {entity.wikipediaUrl && (
+                        <a
+                          href={entity.wikipediaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 text-xs font-medium"
+                          onClick={e => e.stopPropagation()}
+                        >
+                          Wikipedia →
+                        </a>
+                      )}
+                      {entity.dbpediaUrl && (
+                        <a
+                          href={entity.dbpediaUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 text-xs font-medium"
+                          onClick={e => e.stopPropagation()}
+                        >
+                          DBpedia →
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 {/* Arrow pointing down */}
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white dark:border-t-gray-800"></div>
               </div>
             )}
           </span>
