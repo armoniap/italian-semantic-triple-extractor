@@ -6,7 +6,7 @@ import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter basename="/triple">
+    <BrowserRouter basename="/italian-semantic-triple-extractor">
       <App />
     </BrowserRouter>
   </React.StrictMode>
