@@ -234,7 +234,7 @@ const SettingsPage: React.FC = () => {
                   )}
                   <span>
                     {apiTestResult === 'success'
-                      ? 'API key configurata correttamente!'
+                      ? 'API key configurata e salvata in modo sicuro! (Crittografata nel browser)'
                       : 'API key non valida. Verifica la chiave e riprova.'}
                   </span>
                 </div>
