@@ -33,81 +33,81 @@ const EntityHighlighter: React.FC<EntityHighlighterProps> = ({
 
     const typeStyles: Record<string, string> = {
       [ItalianEntityType.PERSON]:
-        'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700',
+        'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 dark:bg-blue-200 dark:text-blue-900 dark:border-blue-300',
       [ItalianEntityType.HISTORICAL_FIGURE]:
-        'bg-indigo-100 text-indigo-800 border-indigo-200 hover:bg-indigo-200 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700',
+        'bg-indigo-100 text-indigo-800 border-indigo-200 hover:bg-indigo-200 dark:bg-indigo-200 dark:text-indigo-900 dark:border-indigo-300',
       [ItalianEntityType.POLITICIAN]:
-        'bg-red-100 text-red-800 border-red-200 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700',
+        'bg-red-100 text-red-800 border-red-200 hover:bg-red-200 dark:bg-red-200 dark:text-red-900 dark:border-red-300',
       [ItalianEntityType.ARTIST]:
-        'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+        'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200 dark:bg-purple-200 dark:text-purple-900 dark:border-purple-300',
       [ItalianEntityType.WRITER]:
-        'bg-pink-100 text-pink-800 border-pink-200 hover:bg-pink-200 dark:bg-pink-900 dark:text-pink-200 dark:border-pink-700',
+        'bg-pink-100 text-pink-800 border-pink-200 hover:bg-pink-200 dark:bg-pink-200 dark:text-pink-900 dark:border-pink-300',
 
       [ItalianEntityType.ITALIAN_CITY]:
-        'bg-green-100 text-green-800 border-green-200 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700',
+        'bg-green-100 text-green-800 border-green-200 hover:bg-green-200 dark:bg-green-200 dark:text-green-900 dark:border-green-300',
       [ItalianEntityType.ITALIAN_REGION]:
-        'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200 dark:bg-emerald-900 dark:text-emerald-200 dark:border-emerald-700',
+        'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200 dark:bg-emerald-200 dark:text-emerald-900 dark:border-emerald-300',
       [ItalianEntityType.ITALIAN_PROVINCE]:
-        'bg-teal-100 text-teal-800 border-teal-200 hover:bg-teal-200 dark:bg-teal-900 dark:text-teal-200 dark:border-teal-700',
+        'bg-teal-100 text-teal-800 border-teal-200 hover:bg-teal-200 dark:bg-teal-200 dark:text-teal-900 dark:border-teal-300',
       [ItalianEntityType.LOCATION]:
-        'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900 dark:text-green-200 dark:border-green-700',
+        'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-200 dark:text-green-900 dark:border-green-300',
       [ItalianEntityType.MONUMENT]:
-        'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700',
+        'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200 dark:bg-amber-200 dark:text-amber-900 dark:border-amber-300',
       [ItalianEntityType.LANDMARK]:
-        'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700',
+        'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-300',
       [ItalianEntityType.PIAZZA]:
-        'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700',
+        'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 dark:bg-yellow-200 dark:text-yellow-900 dark:border-yellow-300',
 
       [ItalianEntityType.ORGANIZATION]:
-        'bg-violet-100 text-violet-800 border-violet-200 hover:bg-violet-200 dark:bg-violet-900 dark:text-violet-200 dark:border-violet-700',
+        'bg-violet-100 text-violet-800 border-violet-200 hover:bg-violet-200 dark:bg-violet-200 dark:text-violet-900 dark:border-violet-300',
       [ItalianEntityType.COMPANY]:
-        'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200 dark:bg-cyan-900 dark:text-cyan-200 dark:border-cyan-700',
+        'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200 dark:bg-cyan-200 dark:text-cyan-900 dark:border-cyan-300',
       [ItalianEntityType.INSTITUTION]:
-        'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600',
+        'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200 dark:bg-slate-300 dark:text-slate-900 dark:border-slate-400',
       [ItalianEntityType.POLITICAL_PARTY]:
-        'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200 dark:bg-rose-900 dark:text-rose-200 dark:border-rose-700',
+        'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200 dark:bg-rose-200 dark:text-rose-900 dark:border-rose-300',
       [ItalianEntityType.UNIVERSITY]:
-        'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700',
+        'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-200 dark:text-blue-900 dark:border-blue-300',
       [ItalianEntityType.MUSEUM]:
-        'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+        'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-200 dark:text-purple-900 dark:border-purple-300',
 
       [ItalianEntityType.DATE]:
-        'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700',
+        'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-300',
       [ItalianEntityType.TIME]:
-        'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700',
+        'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-200 dark:text-amber-900 dark:border-amber-300',
       [ItalianEntityType.PERIOD]:
-        'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700',
+        'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 dark:bg-yellow-200 dark:text-yellow-900 dark:border-yellow-300',
       [ItalianEntityType.ITALIAN_HOLIDAY]:
-        'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-900 dark:text-red-200 dark:border-red-700',
+        'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-200 dark:text-red-900 dark:border-red-300',
       [ItalianEntityType.HISTORICAL_EVENT]:
-        'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700',
+        'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-200 dark:text-indigo-900 dark:border-indigo-300',
 
       [ItalianEntityType.CULTURAL_EVENT]:
-        'bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100 dark:bg-pink-900 dark:text-pink-200 dark:border-pink-700',
+        'bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100 dark:bg-pink-200 dark:text-pink-900 dark:border-pink-300',
       [ItalianEntityType.FESTIVAL]:
-        'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200 hover:bg-fuchsia-200 dark:bg-fuchsia-900 dark:text-fuchsia-200 dark:border-fuchsia-700',
+        'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200 hover:bg-fuchsia-200 dark:bg-fuchsia-200 dark:text-fuchsia-900 dark:border-fuchsia-300',
       [ItalianEntityType.TRADITION]:
-        'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900 dark:text-emerald-200 dark:border-emerald-700',
+        'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-200 dark:text-emerald-900 dark:border-emerald-300',
       [ItalianEntityType.CUISINE]:
-        'bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700',
+        'bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 dark:bg-orange-200 dark:text-orange-900 dark:border-orange-300',
 
       [ItalianEntityType.ITALIAN_BRAND]:
-        'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600',
+        'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 dark:bg-gray-300 dark:text-gray-900 dark:border-gray-400',
       [ItalianEntityType.ITALIAN_PRODUCT]:
-        'bg-stone-100 text-stone-800 border-stone-200 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-200 dark:border-stone-600',
+        'bg-stone-100 text-stone-800 border-stone-200 hover:bg-stone-200 dark:bg-stone-300 dark:text-stone-900 dark:border-stone-400',
 
       [ItalianEntityType.MONETARY]:
-        'bg-green-100 text-green-800 border-green-300 hover:bg-green-200 dark:bg-green-800 dark:text-green-200 dark:border-green-600',
+        'bg-green-100 text-green-800 border-green-300 hover:bg-green-200 dark:bg-green-300 dark:text-green-900 dark:border-green-400',
       [ItalianEntityType.PERCENTAGE]:
-        'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700',
+        'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 dark:bg-blue-200 dark:text-blue-900 dark:border-blue-300',
       [ItalianEntityType.NUMBER]:
-        'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600',
+        'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-300 dark:text-gray-900 dark:border-gray-400',
 
       [ItalianEntityType.MISCELLANEOUS]:
-        'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600',
+        'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 dark:bg-slate-300 dark:text-slate-900 dark:border-slate-400',
     };
 
-    return `${baseClasses} ${typeStyles[entity.type] || 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600'}`;
+    return `${baseClasses} ${typeStyles[entity.type] || 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-300 dark:text-gray-900 dark:border-gray-400'}`;
   };
 
   // Get Italian label for entity type
@@ -213,14 +213,14 @@ const EntityHighlighter: React.FC<EntityHighlighterProps> = ({
 
   if (!highlightMode || entities.length === 0) {
     return (
-      <div className="whitespace-pre-wrap leading-relaxed font-mono text-sm">
+      <div className="whitespace-pre-wrap leading-relaxed font-mono text-sm text-gray-900 dark:text-gray-100">
         {text}
       </div>
     );
   }
 
   return (
-    <div className="whitespace-pre-wrap leading-relaxed font-mono text-sm relative">
+    <div className="whitespace-pre-wrap leading-relaxed font-mono text-sm text-gray-900 dark:text-gray-100 relative">
       {segments.map((segment, index) => {
         if (!segment.isEntity) {
           return <span key={index}>{segment.text}</span>;
