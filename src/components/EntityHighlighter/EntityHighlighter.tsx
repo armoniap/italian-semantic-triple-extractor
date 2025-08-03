@@ -26,56 +26,88 @@ const EntityHighlighter: React.FC<EntityHighlighterProps> = ({
   const { selectEntity } = useApplication();
   const [hoveredEntity, setHoveredEntity] = useState<string | null>(null);
 
-  // Italian-specific entity type styling
+  // Italian-specific entity type styling with better contrast
   const getItalianEntityStyle = (entity: ItalianEntity): string => {
     const baseClasses =
-      'px-1.5 py-0.5 rounded-md text-white font-medium cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105';
+      'px-2 py-1 rounded-md font-medium cursor-pointer transition-all duration-200 hover:shadow-md border';
 
     const typeStyles: Record<string, string> = {
-      [ItalianEntityType.PERSON]: 'bg-blue-600 hover:bg-blue-700',
+      [ItalianEntityType.PERSON]:
+        'bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700',
       [ItalianEntityType.HISTORICAL_FIGURE]:
-        'bg-indigo-600 hover:bg-indigo-700',
-      [ItalianEntityType.POLITICIAN]: 'bg-red-600 hover:bg-red-700',
-      [ItalianEntityType.ARTIST]: 'bg-purple-600 hover:bg-purple-700',
-      [ItalianEntityType.WRITER]: 'bg-pink-600 hover:bg-pink-700',
+        'bg-indigo-100 text-indigo-800 border-indigo-200 hover:bg-indigo-200 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700',
+      [ItalianEntityType.POLITICIAN]:
+        'bg-red-100 text-red-800 border-red-200 hover:bg-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700',
+      [ItalianEntityType.ARTIST]:
+        'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+      [ItalianEntityType.WRITER]:
+        'bg-pink-100 text-pink-800 border-pink-200 hover:bg-pink-200 dark:bg-pink-900 dark:text-pink-200 dark:border-pink-700',
 
-      [ItalianEntityType.ITALIAN_CITY]: 'bg-green-600 hover:bg-green-700',
-      [ItalianEntityType.ITALIAN_REGION]: 'bg-emerald-600 hover:bg-emerald-700',
-      [ItalianEntityType.ITALIAN_PROVINCE]: 'bg-teal-600 hover:bg-teal-700',
-      [ItalianEntityType.LOCATION]: 'bg-green-500 hover:bg-green-600',
-      [ItalianEntityType.MONUMENT]: 'bg-amber-600 hover:bg-amber-700',
-      [ItalianEntityType.LANDMARK]: 'bg-orange-600 hover:bg-orange-700',
-      [ItalianEntityType.PIAZZA]: 'bg-yellow-600 hover:bg-yellow-700',
+      [ItalianEntityType.ITALIAN_CITY]:
+        'bg-green-100 text-green-800 border-green-200 hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700',
+      [ItalianEntityType.ITALIAN_REGION]:
+        'bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200 dark:bg-emerald-900 dark:text-emerald-200 dark:border-emerald-700',
+      [ItalianEntityType.ITALIAN_PROVINCE]:
+        'bg-teal-100 text-teal-800 border-teal-200 hover:bg-teal-200 dark:bg-teal-900 dark:text-teal-200 dark:border-teal-700',
+      [ItalianEntityType.LOCATION]:
+        'bg-green-50 text-green-700 border-green-200 hover:bg-green-100 dark:bg-green-900 dark:text-green-200 dark:border-green-700',
+      [ItalianEntityType.MONUMENT]:
+        'bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700',
+      [ItalianEntityType.LANDMARK]:
+        'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700',
+      [ItalianEntityType.PIAZZA]:
+        'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700',
 
-      [ItalianEntityType.ORGANIZATION]: 'bg-violet-600 hover:bg-violet-700',
-      [ItalianEntityType.COMPANY]: 'bg-cyan-600 hover:bg-cyan-700',
-      [ItalianEntityType.INSTITUTION]: 'bg-slate-600 hover:bg-slate-700',
-      [ItalianEntityType.POLITICAL_PARTY]: 'bg-rose-600 hover:bg-rose-700',
-      [ItalianEntityType.UNIVERSITY]: 'bg-blue-500 hover:bg-blue-600',
-      [ItalianEntityType.MUSEUM]: 'bg-purple-500 hover:bg-purple-600',
+      [ItalianEntityType.ORGANIZATION]:
+        'bg-violet-100 text-violet-800 border-violet-200 hover:bg-violet-200 dark:bg-violet-900 dark:text-violet-200 dark:border-violet-700',
+      [ItalianEntityType.COMPANY]:
+        'bg-cyan-100 text-cyan-800 border-cyan-200 hover:bg-cyan-200 dark:bg-cyan-900 dark:text-cyan-200 dark:border-cyan-700',
+      [ItalianEntityType.INSTITUTION]:
+        'bg-slate-100 text-slate-800 border-slate-200 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600',
+      [ItalianEntityType.POLITICAL_PARTY]:
+        'bg-rose-100 text-rose-800 border-rose-200 hover:bg-rose-200 dark:bg-rose-900 dark:text-rose-200 dark:border-rose-700',
+      [ItalianEntityType.UNIVERSITY]:
+        'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700',
+      [ItalianEntityType.MUSEUM]:
+        'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
 
-      [ItalianEntityType.DATE]: 'bg-orange-500 hover:bg-orange-600',
-      [ItalianEntityType.TIME]: 'bg-amber-500 hover:bg-amber-600',
-      [ItalianEntityType.PERIOD]: 'bg-yellow-500 hover:bg-yellow-600',
-      [ItalianEntityType.ITALIAN_HOLIDAY]: 'bg-red-500 hover:bg-red-600',
-      [ItalianEntityType.HISTORICAL_EVENT]: 'bg-indigo-500 hover:bg-indigo-600',
+      [ItalianEntityType.DATE]:
+        'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700',
+      [ItalianEntityType.TIME]:
+        'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700',
+      [ItalianEntityType.PERIOD]:
+        'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700',
+      [ItalianEntityType.ITALIAN_HOLIDAY]:
+        'bg-red-50 text-red-700 border-red-200 hover:bg-red-100 dark:bg-red-900 dark:text-red-200 dark:border-red-700',
+      [ItalianEntityType.HISTORICAL_EVENT]:
+        'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700',
 
-      [ItalianEntityType.CULTURAL_EVENT]: 'bg-pink-500 hover:bg-pink-600',
-      [ItalianEntityType.FESTIVAL]: 'bg-fuchsia-600 hover:bg-fuchsia-700',
-      [ItalianEntityType.TRADITION]: 'bg-emerald-500 hover:bg-emerald-600',
-      [ItalianEntityType.CUISINE]: 'bg-orange-400 hover:bg-orange-500',
+      [ItalianEntityType.CULTURAL_EVENT]:
+        'bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100 dark:bg-pink-900 dark:text-pink-200 dark:border-pink-700',
+      [ItalianEntityType.FESTIVAL]:
+        'bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200 hover:bg-fuchsia-200 dark:bg-fuchsia-900 dark:text-fuchsia-200 dark:border-fuchsia-700',
+      [ItalianEntityType.TRADITION]:
+        'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 dark:bg-emerald-900 dark:text-emerald-200 dark:border-emerald-700',
+      [ItalianEntityType.CUISINE]:
+        'bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 dark:bg-orange-900 dark:text-orange-200 dark:border-orange-700',
 
-      [ItalianEntityType.ITALIAN_BRAND]: 'bg-gray-600 hover:bg-gray-700',
-      [ItalianEntityType.ITALIAN_PRODUCT]: 'bg-stone-600 hover:bg-stone-700',
+      [ItalianEntityType.ITALIAN_BRAND]:
+        'bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600',
+      [ItalianEntityType.ITALIAN_PRODUCT]:
+        'bg-stone-100 text-stone-800 border-stone-200 hover:bg-stone-200 dark:bg-stone-700 dark:text-stone-200 dark:border-stone-600',
 
-      [ItalianEntityType.MONETARY]: 'bg-green-700 hover:bg-green-800',
-      [ItalianEntityType.PERCENTAGE]: 'bg-blue-400 hover:bg-blue-500',
-      [ItalianEntityType.NUMBER]: 'bg-gray-500 hover:bg-gray-600',
+      [ItalianEntityType.MONETARY]:
+        'bg-green-100 text-green-800 border-green-300 hover:bg-green-200 dark:bg-green-800 dark:text-green-200 dark:border-green-600',
+      [ItalianEntityType.PERCENTAGE]:
+        'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700',
+      [ItalianEntityType.NUMBER]:
+        'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600',
 
-      [ItalianEntityType.MISCELLANEOUS]: 'bg-slate-500 hover:bg-slate-600',
+      [ItalianEntityType.MISCELLANEOUS]:
+        'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600',
     };
 
-    return `${baseClasses} ${typeStyles[entity.type] || 'bg-gray-500 hover:bg-gray-600'}`;
+    return `${baseClasses} ${typeStyles[entity.type] || 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600'}`;
   };
 
   // Get Italian label for entity type

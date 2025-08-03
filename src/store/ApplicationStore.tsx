@@ -53,6 +53,7 @@ export interface ApplicationState {
   toggleSidebar: () => void;
   toggleHighlightMode: () => void;
   setAnalysisError: (error: string | null) => void;
+  applyTheme: () => void;
 }
 
 const useApplicationStore = create<ApplicationState>()(
@@ -130,6 +131,11 @@ const useApplicationStore = create<ApplicationState>()(
 
         set({ preferences: updatedPreferences });
         SecureStorage.savePreferences(updatedPreferences);
+
+        // Apply theme if theme preference changed
+        if (newPreferences.theme !== undefined) {
+          get().applyTheme();
+        }
       },
 
       analyzeText: async (text: string) => {
@@ -270,6 +276,20 @@ const useApplicationStore = create<ApplicationState>()(
       setAnalysisError: (error: string | null) => {
         set({ analysisError: error });
       },
+
+      applyTheme: () => {
+        const { preferences } = get();
+        const isDark =
+          preferences.theme === 'dark' ||
+          (preferences.theme === 'auto' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      },
     })),
     {
       name: 'italian-triple-extractor-store',
@@ -290,6 +310,27 @@ useApplicationStore.subscribe(
   },
   { fireImmediately: true }
 );
+
+// Initialize theme on app load
+useApplicationStore.subscribe(
+  state => state.preferences,
+  () => {
+    useApplicationStore.getState().applyTheme();
+  },
+  { fireImmediately: true }
+);
+
+// Listen for system theme changes
+if (typeof window !== 'undefined') {
+  window
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', () => {
+      const { preferences, applyTheme } = useApplicationStore.getState();
+      if (preferences.theme === 'auto') {
+        applyTheme();
+      }
+    });
+}
 
 // Context for React components
 const ApplicationContext = createContext<typeof useApplicationStore | null>(
