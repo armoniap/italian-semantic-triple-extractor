@@ -82,9 +82,11 @@ export class SecureStorage {
 
       // Log access for security monitoring (without exposing the key)
       this.logSecurityEvent('API_KEY_SAVED', { timestamp: Date.now() });
-      
+
       // Inform user that data is encrypted
-      console.info('🔒 API key saved securely with AES encryption in browser localStorage');
+      console.info(
+        '🔒 API key saved securely with AES encryption in browser localStorage'
+      );
 
       return true;
     } catch (error) {
