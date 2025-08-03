@@ -467,7 +467,7 @@ ESEMPI DI PATTERN ITALIANI:
   async validateApiKey(apiKey: string): Promise<boolean> {
     try {
       const tempGenAI = new GoogleGenerativeAI(apiKey);
-      const tempModel = tempGenAI.getGenerativeModel({ model: 'gemini-pro' });
+      const tempModel = tempGenAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const result = await tempModel.generateContent('Test');
       await result.response;
