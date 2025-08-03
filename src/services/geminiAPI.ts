@@ -64,7 +64,7 @@ export class GeminiAPIService {
       };
 
       this.model = this.genAI.getGenerativeModel({
-        model: 'gemini-1.5-pro-latest',
+        model: 'gemini-1.5-flash',
         generationConfig,
       });
 
