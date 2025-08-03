@@ -47,11 +47,7 @@ jobs:
       if: github.ref == 'refs/heads/main'
       uses: actions/upload-pages-artifact@v3
       with:
-        path: '.'
-
-    - name: Copy files to root directory
-      if: github.ref == 'refs/heads/main'
-      run: cp -r dist/. .
+        path: './dist'
         
     - name: Deploy to GitHub Pages
       if: github.ref == 'refs/heads/main'
