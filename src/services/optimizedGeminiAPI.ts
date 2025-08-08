@@ -120,7 +120,7 @@ class TokenRateLimiter {
     const now = Date.now();
     const timePassed = now - this.lastRefill;
     const tokensToAdd = (timePassed / 60000) * this.maxTokensPerMinute;
-    
+
     this.tokenBudget = Math.min(
       this.maxTokensPerMinute,
       this.tokenBudget + tokensToAdd
@@ -149,7 +149,7 @@ export class OptimizedGeminiAPIService {
     };
 
     const finalConfig = { ...defaultConfig, ...config };
-    
+
     this.rateLimiter = new TokenRateLimiter(finalConfig);
     this.responseCache = new LRUCache(1000); // Cache 1000 responses
     this.textPreprocessingCache = new LRUCache(500); // Cache preprocessing
@@ -176,7 +176,9 @@ export class OptimizedGeminiAPIService {
         generationConfig,
       });
 
-      console.log('✅ Optimized Gemini API initialized with caching and concurrency');
+      console.log(
+        '✅ Optimized Gemini API initialized with caching and concurrency'
+      );
     } catch (error) {
       console.error('Failed to initialize Optimized Gemini API:', error);
       throw new Error('Invalid API key or initialization failed');
@@ -199,7 +201,7 @@ export class OptimizedGeminiAPIService {
     const startTime = Date.now();
 
     // Create concurrent promises for all requests
-    const promises = requests.map((request, index) => 
+    const promises = requests.map((request, index) =>
       this.processSingleRequestWithRetry(request, index)
     );
 
@@ -212,19 +214,21 @@ export class OptimizedGeminiAPIService {
         return {
           success: true,
           data: result.value,
-          metadata: requests[index].metadata
+          metadata: requests[index].metadata,
         };
       } else {
         return {
           success: false,
           error: result.reason?.toString() || 'Unknown error',
-          metadata: requests[index].metadata
+          metadata: requests[index].metadata,
         };
       }
     });
 
     const processingTime = Date.now() - startTime;
-    console.log(`⚡ Batch completed in ${processingTime}ms (avg: ${processingTime/requests.length}ms per request)`);
+    console.log(
+      `⚡ Batch completed in ${processingTime}ms (avg: ${processingTime / requests.length}ms per request)`
+    );
 
     return batchResults;
   }
@@ -240,7 +244,7 @@ export class OptimizedGeminiAPIService {
     // Check cache first
     const cacheKey = this.generateCacheKey(text, analysisType);
     const cachedResult = this.responseCache.get(cacheKey);
-    
+
     if (cachedResult) {
       console.log('📋 Cache hit - returning cached result');
       return cachedResult;
@@ -248,10 +252,10 @@ export class OptimizedGeminiAPIService {
 
     // Process with optimizations
     const result = await this.processSingleText(text, analysisType, chunkSize);
-    
+
     // Cache the result
     this.responseCache.set(cacheKey, result);
-    
+
     return result;
   }
 
@@ -265,17 +269,21 @@ export class OptimizedGeminiAPIService {
   ): Promise<any> {
     // Preprocess text (with caching)
     const preprocessedText = this.preprocessItalianTextCached(text);
-    
+
     // Check if chunking is needed
     if (preprocessedText.length > chunkSize) {
-      return this.analyzeTextInChunksConcurrently(preprocessedText, analysisType, chunkSize);
+      return this.analyzeTextInChunksConcurrently(
+        preprocessedText,
+        analysisType,
+        chunkSize
+      );
     }
 
     // Single request
     const request: BatchRequest = {
       text: preprocessedText,
       analysisType,
-      chunkSize
+      chunkSize,
     };
 
     const results = await this.processBatch([request]);
@@ -297,7 +305,7 @@ export class OptimizedGeminiAPIService {
     const requests: BatchRequest[] = chunks.map((chunk, index) => ({
       text: chunk.text,
       analysisType,
-      metadata: { chunkIndex: index, offset: chunk.offset }
+      metadata: { chunkIndex: index, offset: chunk.offset },
     }));
 
     // Process all chunks concurrently
@@ -314,7 +322,10 @@ export class OptimizedGeminiAPIService {
     request: BatchRequest,
     requestId: number
   ): Promise<any> {
-    const prompt = this.buildItalianAnalysisPrompt(request.text, request.analysisType);
+    const prompt = this.buildItalianAnalysisPrompt(
+      request.text,
+      request.analysisType
+    );
     const estimatedTokens = Math.ceil(prompt.length / 4);
 
     // Wait for rate limit clearance
@@ -326,12 +337,13 @@ export class OptimizedGeminiAPIService {
 
       // Check for safety issues
       if (response.promptFeedback?.blockReason) {
-        throw new Error(`Content blocked: ${response.promptFeedback.blockReason}`);
+        throw new Error(
+          `Content blocked: ${response.promptFeedback.blockReason}`
+        );
       }
 
       const analysisResult = response.text();
       return this.parseAnalysisResponse(analysisResult, request.analysisType);
-
     } catch (error) {
       console.error(`Request ${requestId} failed:`, error);
       throw error;
@@ -383,7 +395,7 @@ export class OptimizedGeminiAPIService {
     let hash = 0;
     for (let i = 0; i < combined.length; i++) {
       const char = combined.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash).toString(16);
@@ -458,7 +470,10 @@ export class OptimizedGeminiAPIService {
   }
 
   // ... (keeping other methods from original implementation)
-  private buildItalianAnalysisPrompt(text: string, analysisType: string): string {
+  private buildItalianAnalysisPrompt(
+    text: string,
+    analysisType: string
+  ): string {
     // Same implementation as original GeminiAPIService
     const italianContext = this.getItalianContextualInstructions();
 
@@ -556,7 +571,7 @@ RELAZIONI ITALIANE SPECIFICHE:
   private parseAnalysisResponse(response: string, analysisType: string): any {
     try {
       let cleanResponse = response.replace(/```json\n?|\n?```/g, '');
-      
+
       const jsonStart = cleanResponse.indexOf('{');
       if (jsonStart > 0) {
         cleanResponse = cleanResponse.substring(jsonStart);
@@ -571,7 +586,7 @@ RELAZIONI ITALIANE SPECIFICHE:
       return this.validateAndCleanResponse(parsed, analysisType);
     } catch (error) {
       console.error('Failed to parse Gemini response:', error);
-      
+
       if (analysisType === 'entities') {
         return { entities: [] };
       } else if (analysisType === 'triples') {
@@ -585,7 +600,10 @@ RELAZIONI ITALIANE SPECIFICHE:
   private validateAndCleanResponse(response: any, analysisType: string): any {
     const cleaned: any = {};
 
-    if ((analysisType === 'entities' || analysisType === 'both') && response.entities) {
+    if (
+      (analysisType === 'entities' || analysisType === 'both') &&
+      response.entities
+    ) {
       cleaned.entities = response.entities.filter(
         (entity: any) =>
           entity.text &&
@@ -595,7 +613,10 @@ RELAZIONI ITALIANE SPECIFICHE:
       );
     }
 
-    if ((analysisType === 'triples' || analysisType === 'both') && response.triples) {
+    if (
+      (analysisType === 'triples' || analysisType === 'both') &&
+      response.triples
+    ) {
       cleaned.triples = response.triples.filter(
         (triple: any) =>
           triple.subject &&
@@ -616,12 +637,12 @@ RELAZIONI ITALIANE SPECIFICHE:
     return {
       responseCache: {
         size: this.responseCache.size(),
-        maxSize: 1000
+        maxSize: 1000,
       },
       textPreprocessingCache: {
         size: this.textPreprocessingCache.size(),
-        maxSize: 500
-      }
+        maxSize: 500,
+      },
     };
   }
 

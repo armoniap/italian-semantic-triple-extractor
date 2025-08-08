@@ -45,18 +45,78 @@ class LazyItalianGeoData {
   private loadItalianCities(): Record<string, any> {
     // Load only the most important cities to reduce memory usage
     return {
-      Roma: { region: 'Lazio', province: 'Roma', population: 2873000, coordinates: [41.9028, 12.4964] },
-      Milano: { region: 'Lombardia', province: 'Milano', population: 1366000, coordinates: [45.4642, 9.19] },
-      Napoli: { region: 'Campania', province: 'Napoli', population: 967000, coordinates: [40.8518, 14.2681] },
-      Torino: { region: 'Piemonte', province: 'Torino', population: 875000, coordinates: [45.0703, 7.6869] },
-      Palermo: { region: 'Sicilia', province: 'Palermo', population: 674000, coordinates: [38.1157, 13.3615] },
-      Genova: { region: 'Liguria', province: 'Genova', population: 595000, coordinates: [44.4056, 8.9463] },
-      Bologna: { region: 'Emilia-Romagna', province: 'Bologna', population: 390000, coordinates: [44.4949, 11.3426] },
-      Firenze: { region: 'Toscana', province: 'Firenze', population: 382000, coordinates: [43.7696, 11.2558] },
-      Bari: { region: 'Puglia', province: 'Bari', population: 325000, coordinates: [41.1171, 16.8719] },
-      Catania: { region: 'Sicilia', province: 'Catania', population: 315000, coordinates: [37.5079, 15.083] },
-      Venezia: { region: 'Veneto', province: 'Venezia', population: 261000, coordinates: [45.4408, 12.3155] },
-      Verona: { region: 'Veneto', province: 'Verona', population: 259000, coordinates: [45.4384, 10.9916] },
+      Roma: {
+        region: 'Lazio',
+        province: 'Roma',
+        population: 2873000,
+        coordinates: [41.9028, 12.4964],
+      },
+      Milano: {
+        region: 'Lombardia',
+        province: 'Milano',
+        population: 1366000,
+        coordinates: [45.4642, 9.19],
+      },
+      Napoli: {
+        region: 'Campania',
+        province: 'Napoli',
+        population: 967000,
+        coordinates: [40.8518, 14.2681],
+      },
+      Torino: {
+        region: 'Piemonte',
+        province: 'Torino',
+        population: 875000,
+        coordinates: [45.0703, 7.6869],
+      },
+      Palermo: {
+        region: 'Sicilia',
+        province: 'Palermo',
+        population: 674000,
+        coordinates: [38.1157, 13.3615],
+      },
+      Genova: {
+        region: 'Liguria',
+        province: 'Genova',
+        population: 595000,
+        coordinates: [44.4056, 8.9463],
+      },
+      Bologna: {
+        region: 'Emilia-Romagna',
+        province: 'Bologna',
+        population: 390000,
+        coordinates: [44.4949, 11.3426],
+      },
+      Firenze: {
+        region: 'Toscana',
+        province: 'Firenze',
+        population: 382000,
+        coordinates: [43.7696, 11.2558],
+      },
+      Bari: {
+        region: 'Puglia',
+        province: 'Bari',
+        population: 325000,
+        coordinates: [41.1171, 16.8719],
+      },
+      Catania: {
+        region: 'Sicilia',
+        province: 'Catania',
+        population: 315000,
+        coordinates: [37.5079, 15.083],
+      },
+      Venezia: {
+        region: 'Veneto',
+        province: 'Venezia',
+        population: 261000,
+        coordinates: [45.4408, 12.3155],
+      },
+      Verona: {
+        region: 'Veneto',
+        province: 'Verona',
+        population: 259000,
+        coordinates: [45.4384, 10.9916],
+      },
     };
   }
 
@@ -67,7 +127,11 @@ class LazyItalianGeoData {
       Campania: { capital: 'Napoli', area: 13671, population: 5802000 },
       Sicilia: { capital: 'Palermo', area: 25832, population: 4999000 },
       Veneto: { capital: 'Venezia', area: 18407, population: 4906000 },
-      'Emilia-Romagna': { capital: 'Bologna', area: 22451, population: 4459000 },
+      'Emilia-Romagna': {
+        capital: 'Bologna',
+        area: 22451,
+        population: 4459000,
+      },
       Piemonte: { capital: 'Torino', area: 25387, population: 4356000 },
       Puglia: { capital: 'Bari', area: 19541, population: 4029000 },
       Toscana: { capital: 'Firenze', area: 22987, population: 3729000 },
@@ -82,21 +146,22 @@ function memoize<Args extends any[], Return>(
   keyFn?: (...args: Args) => string
 ): (...args: Args) => Return {
   const cache = new Map<string, Return>();
-  
+
   return (...args: Args): Return => {
     const key = keyFn ? keyFn(...args) : JSON.stringify(args);
-    
+
     if (cache.has(key)) {
       return cache.get(key)!;
     }
-    
+
     const result = fn(...args);
     cache.set(key, result);
     return result;
   };
 }
 
-export interface OptimizedEntityExtractionResult extends EntityExtractionResult {
+export interface OptimizedEntityExtractionResult
+  extends EntityExtractionResult {
   entities: EnhancedEntity[];
   semanticInsights: string[];
   culturalContext: string[];
@@ -136,11 +201,11 @@ export class OptimizedItalianEntityExtractor {
       this.detectLanguage.bind(this),
       (text: string) => text.substring(0, 100) // Use first 100 chars as key
     );
-    
+
     this.memoizedNormalizeEntityType = memoize(
       this.normalizeEntityType.bind(this)
     );
-    
+
     this.memoizedCalculateConfidence = memoize(
       this.calculateOverallConfidence.bind(this),
       (entities: ItalianEntity[]) => entities.map(e => e.confidence).join(',')
@@ -150,7 +215,9 @@ export class OptimizedItalianEntityExtractor {
   /**
    * OPTIMIZED: Extract entities with parallel AI + rule-based processing
    */
-  async extractEntities(text: string): Promise<OptimizedEntityExtractionResult> {
+  async extractEntities(
+    text: string
+  ): Promise<OptimizedEntityExtractionResult> {
     if (this.useSemanticEnhancement && this.semanticSearchService?.isReady()) {
       return this.extractEntitiesWithSemanticEnhancement(text);
     } else {
@@ -161,35 +228,39 @@ export class OptimizedItalianEntityExtractor {
   /**
    * Optimized entity extraction with parallel processing
    */
-  private async extractEntitiesOptimized(text: string): Promise<OptimizedEntityExtractionResult> {
+  private async extractEntitiesOptimized(
+    text: string
+  ): Promise<OptimizedEntityExtractionResult> {
     const startTime = Date.now();
-    
+
     try {
       console.log('🚀 Starting optimized entity extraction...');
-      
+
       // Pre-process text once (will be cached)
       const preprocessedText = this.preprocessItalianText(text);
-      
+
       // Detect language (memoized)
       const language = this.memoizedDetectLanguage(preprocessedText);
       if (language !== 'it') {
-        console.warn('⚠️ Text may not be in Italian, extraction accuracy may be reduced');
+        console.warn(
+          '⚠️ Text may not be in Italian, extraction accuracy may be reduced'
+        );
       }
 
       // PARALLEL PROCESSING: Run AI extraction and rule-based extraction concurrently
       const aiStartTime = Date.now();
       const ruleStartTime = Date.now();
-      
+
       const [aiResult, ruleBasedEntities] = await Promise.all([
         // AI-based extraction (potentially cached)
         this.geminiService.analyzeItalianText(preprocessedText, 'entities'),
         // Rule-based extraction (runs in parallel)
-        Promise.resolve(this.extractRuleBasedItalianEntities(preprocessedText))
+        Promise.resolve(this.extractRuleBasedItalianEntities(preprocessedText)),
       ]);
 
       const aiProcessingTime = Date.now() - aiStartTime;
       const ruleProcessingTime = Date.now() - ruleStartTime;
-      
+
       // Calculate parallel efficiency
       const sequentialTime = aiProcessingTime + ruleProcessingTime;
       const parallelTime = Math.max(aiProcessingTime, ruleProcessingTime);
@@ -203,17 +274,20 @@ export class OptimizedItalianEntityExtractor {
       );
 
       // Apply optimized confidence scoring (memoized)
-      const scoredEntities = this.applyOptimizedConfidenceScoring(mergedEntities);
+      const scoredEntities =
+        this.applyOptimizedConfidenceScoring(mergedEntities);
 
       // Enrich with Italian-specific data (parallelized)
-      const enrichedEntities = await this.enrichWithItalianDataOptimized(scoredEntities);
+      const enrichedEntities =
+        await this.enrichWithItalianDataOptimized(scoredEntities);
 
       const confidence = this.memoizedCalculateConfidence(enrichedEntities);
       const processingTime = Date.now() - startTime;
 
       // Get cache statistics
       const cacheStats = this.geminiService.getCacheStats();
-      const cacheHits = cacheStats.responseCache.size + cacheStats.textPreprocessingCache.size;
+      const cacheHits =
+        cacheStats.responseCache.size + cacheStats.textPreprocessingCache.size;
 
       return {
         entities: enrichedEntities,
@@ -227,8 +301,8 @@ export class OptimizedItalianEntityExtractor {
         processingStats: {
           aiProcessingTime,
           ruleProcessingTime,
-          parallelEfficiency
-        }
+          parallelEfficiency,
+        },
       };
     } catch (error) {
       console.error('❌ Optimized entity extraction failed:', error);
@@ -239,7 +313,9 @@ export class OptimizedItalianEntityExtractor {
   /**
    * OPTIMIZED: Extract entities with semantic enhancement
    */
-  async extractEntitiesWithSemanticEnhancement(text: string): Promise<OptimizedEntityExtractionResult> {
+  async extractEntitiesWithSemanticEnhancement(
+    text: string
+  ): Promise<OptimizedEntityExtractionResult> {
     const startTime = Date.now();
 
     try {
@@ -288,16 +364,18 @@ export class OptimizedItalianEntityExtractor {
   /**
    * OPTIMIZED: Parallel enrichment with Italian data
    */
-  private async enrichWithItalianDataOptimized(entities: any[]): Promise<ItalianEntity[]> {
+  private async enrichWithItalianDataOptimized(
+    entities: any[]
+  ): Promise<ItalianEntity[]> {
     // Process entities in parallel batches
     const batchSize = 10;
     const batches = [];
-    
+
     for (let i = 0; i < entities.length; i += batchSize) {
       const batch = entities.slice(i, i + batchSize);
       batches.push(this.processBatchEnrichment(batch, i));
     }
-    
+
     const results = await Promise.all(batches);
     return results.flat().filter(entity => entity !== null) as ItalianEntity[];
   }
@@ -305,7 +383,10 @@ export class OptimizedItalianEntityExtractor {
   /**
    * Process a batch of entities for enrichment
    */
-  private async processBatchEnrichment(entities: any[], startIndex: number): Promise<(ItalianEntity | null)[]> {
+  private async processBatchEnrichment(
+    entities: any[],
+    startIndex: number
+  ): Promise<(ItalianEntity | null)[]> {
     return entities.map((entity, localIndex) => {
       const globalIndex = startIndex + localIndex;
       return this.createItalianEntity(entity, globalIndex, '');
@@ -322,12 +403,16 @@ export class OptimizedItalianEntityExtractor {
     // Use more efficient string matching for known entities
     const italianCities = Object.keys(cities);
     const cityPattern = new RegExp(`\\b(${italianCities.join('|')})\\b`, 'gi');
-    
+
     let match;
     while ((match = cityPattern.exec(text)) !== null) {
       const cityName = match[1];
-      const geoData = cities[cityName] || cities[cityName.charAt(0).toUpperCase() + cityName.slice(1).toLowerCase()];
-      
+      const geoData =
+        cities[cityName] ||
+        cities[
+          cityName.charAt(0).toUpperCase() + cityName.slice(1).toLowerCase()
+        ];
+
       if (geoData) {
         entities.push({
           text: match[0],
@@ -362,7 +447,7 @@ export class OptimizedItalianEntityExtractor {
 
       return {
         ...entity,
-        confidence
+        confidence,
       };
     });
   }
@@ -370,22 +455,28 @@ export class OptimizedItalianEntityExtractor {
   /**
    * Cached version of known entity check
    */
-  private isKnownItalianEntityCached = memoize((text: string, type: string): boolean => {
-    if (!text) return false;
+  private isKnownItalianEntityCached = memoize(
+    (text: string, type: string): boolean => {
+      if (!text) return false;
 
-    const textLower = text.toLowerCase();
-    const cities = this.geoData.getCities();
-    const regions = this.geoData.getRegions();
+      const textLower = text.toLowerCase();
+      const cities = this.geoData.getCities();
+      const regions = this.geoData.getRegions();
 
-    switch (type) {
-      case 'ITALIAN_CITY':
-        return Object.keys(cities).some(city => city.toLowerCase() === textLower);
-      case 'ITALIAN_REGION':
-        return Object.keys(regions).some(region => region.toLowerCase() === textLower);
-      default:
-        return false;
+      switch (type) {
+        case 'ITALIAN_CITY':
+          return Object.keys(cities).some(
+            city => city.toLowerCase() === textLower
+          );
+        case 'ITALIAN_REGION':
+          return Object.keys(regions).some(
+            region => region.toLowerCase() === textLower
+          );
+        default:
+          return false;
+      }
     }
-  });
+  );
 
   // Memoized text preprocessing
   private preprocessItalianText = memoize((text: string): string => {
@@ -410,18 +501,37 @@ export class OptimizedItalianEntityExtractor {
     // Use a smaller sample for faster detection
     const sample = text.substring(0, 500);
     const words = sample.toLowerCase().split(/\s+/);
-    
+
     // Optimized Italian indicator check
-    const italianWordSet = new Set(['il', 'la', 'di', 'che', 'e', 'a', 'un', 'per', 'in', 'con', 'non', 'una', 'su', 'del', 'da', 'al']);
-    
-    const italianWordCount = words.filter(word => italianWordSet.has(word)).length;
+    const italianWordSet = new Set([
+      'il',
+      'la',
+      'di',
+      'che',
+      'e',
+      'a',
+      'un',
+      'per',
+      'in',
+      'con',
+      'non',
+      'una',
+      'su',
+      'del',
+      'da',
+      'al',
+    ]);
+
+    const italianWordCount = words.filter(word =>
+      italianWordSet.has(word)
+    ).length;
     const italianScore = (italianWordCount / Math.max(words.length, 1)) * 100;
-    
+
     return italianScore > 15 ? 'it' : 'unknown';
   }
 
   // ... (other helper methods remain the same but can be optimized similarly)
-  
+
   private normalizeEntityType(rawType: string): ItalianEntityType {
     const typeMapping: Record<string, ItalianEntityType> = {
       PERSON: ItalianEntityType.PERSON,
@@ -435,17 +545,23 @@ export class OptimizedItalianEntityExtractor {
       MONUMENT: ItalianEntityType.MONUMENT,
     };
 
-    return typeMapping[rawType?.toUpperCase()] || ItalianEntityType.MISCELLANEOUS;
+    return (
+      typeMapping[rawType?.toUpperCase()] || ItalianEntityType.MISCELLANEOUS
+    );
   }
 
-  private createItalianEntity(rawEntity: any, index: number, _originalText: string): ItalianEntity | null {
+  private createItalianEntity(
+    rawEntity: any,
+    index: number,
+    _originalText: string
+  ): ItalianEntity | null {
     try {
       if (!rawEntity.text || typeof rawEntity.confidence !== 'number') {
         return null;
       }
 
       const entityType = this.memoizedNormalizeEntityType(rawEntity.type);
-      
+
       return {
         id: `entity_${index}_${Date.now()}`,
         text: rawEntity.text.trim(),
@@ -463,10 +579,13 @@ export class OptimizedItalianEntityExtractor {
     }
   }
 
-  private generateWikipediaUrl(entityText: string, entityType: ItalianEntityType): string | undefined {
+  private generateWikipediaUrl(
+    entityText: string,
+    entityType: ItalianEntityType
+  ): string | undefined {
     const baseUrl = 'https://it.wikipedia.org/wiki/';
     const normalizedText = entityText.replace(/\s+/g, '_');
-    
+
     const eligibleTypes = [
       ItalianEntityType.PERSON,
       ItalianEntityType.HISTORICAL_FIGURE,
@@ -482,10 +601,13 @@ export class OptimizedItalianEntityExtractor {
     return undefined;
   }
 
-  private generateDBpediaUrl(entityText: string, entityType: ItalianEntityType): string | undefined {
+  private generateDBpediaUrl(
+    entityText: string,
+    entityType: ItalianEntityType
+  ): string | undefined {
     const baseUrl = 'http://it.dbpedia.org/resource/';
     const normalizedText = entityText.replace(/\s+/g, '_');
-    
+
     const eligibleTypes = [
       ItalianEntityType.ITALIAN_CITY,
       ItalianEntityType.ITALIAN_REGION,
@@ -501,11 +623,18 @@ export class OptimizedItalianEntityExtractor {
 
   private calculateOverallConfidence(entities: ItalianEntity[]): number {
     if (entities.length === 0) return 0;
-    const totalConfidence = entities.reduce((sum, entity) => sum + entity.confidence, 0);
+    const totalConfidence = entities.reduce(
+      (sum, entity) => sum + entity.confidence,
+      0
+    );
     return totalConfidence / entities.length;
   }
 
-  private mergeEntityResults(aiEntities: any[], ruleEntities: any[], _originalText: string): any[] {
+  private mergeEntityResults(
+    aiEntities: any[],
+    ruleEntities: any[],
+    _originalText: string
+  ): any[] {
     const merged = [...aiEntities];
     const aiEntityTexts = new Set(aiEntities.map(e => e.text?.toLowerCase()));
 
@@ -513,7 +642,9 @@ export class OptimizedItalianEntityExtractor {
     ruleEntities.forEach(ruleEntity => {
       const textLower = ruleEntity.text.toLowerCase();
       if (!aiEntityTexts.has(textLower)) {
-        const hasOverlap = merged.some(existing => this.entitiesOverlap(existing, ruleEntity));
+        const hasOverlap = merged.some(existing =>
+          this.entitiesOverlap(existing, ruleEntity)
+        );
         if (!hasOverlap) {
           merged.push(ruleEntity);
         }
@@ -524,15 +655,37 @@ export class OptimizedItalianEntityExtractor {
   }
 
   private entitiesOverlap(entity1: any, entity2: any): boolean {
-    if (!entity1.startOffset || !entity1.endOffset || !entity2.startOffset || !entity2.endOffset) {
+    if (
+      !entity1.startOffset ||
+      !entity1.endOffset ||
+      !entity2.startOffset ||
+      !entity2.endOffset
+    ) {
       return false;
     }
-    return !(entity1.endOffset <= entity2.startOffset || entity2.endOffset <= entity1.startOffset);
+    return !(
+      entity1.endOffset <= entity2.startOffset ||
+      entity2.endOffset <= entity1.startOffset
+    );
   }
 
   private async extractCulturalContext(text: string): Promise<string[]> {
-    const culturalKeywords = ['tradizione', 'cultura', 'storia', 'arte', 'cucina', 'festa', 'dialetto', 'regione', 'patrimonio', 'unesco', 'rinascimento', 'romano', 'medievale'];
-    
+    const culturalKeywords = [
+      'tradizione',
+      'cultura',
+      'storia',
+      'arte',
+      'cucina',
+      'festa',
+      'dialetto',
+      'regione',
+      'patrimonio',
+      'unesco',
+      'rinascimento',
+      'romano',
+      'medievale',
+    ];
+
     const context: string[] = [];
     const lowercaseText = text.toLowerCase();
 
@@ -540,7 +693,9 @@ export class OptimizedItalianEntityExtractor {
       if (lowercaseText.includes(keyword)) {
         switch (keyword) {
           case 'rinascimento':
-            context.push('Periodo artistico-culturale italiano (XV-XVI secolo)');
+            context.push(
+              'Periodo artistico-culturale italiano (XV-XVI secolo)'
+            );
             break;
           case 'romano':
             context.push("Relativo all'Impero Romano o alla città di Roma");
@@ -565,8 +720,8 @@ export class OptimizedItalianEntityExtractor {
       cacheStats: this.geminiService.getCacheStats(),
       geoDataLoaded: {
         cities: Object.keys(this.geoData.getCities()).length,
-        regions: Object.keys(this.geoData.getRegions()).length
-      }
+        regions: Object.keys(this.geoData.getRegions()).length,
+      },
     };
   }
 
