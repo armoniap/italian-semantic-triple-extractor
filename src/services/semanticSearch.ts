@@ -8,6 +8,7 @@ import ItalianVectorStore, {
   SearchResult,
   SemanticSearchOptions,
 } from './vectorStore';
+import ItalianKnowledgeBaseService from './knowledgeBase';
 import { ItalianEntity } from '@/types/entities';
 import { SemanticTriple } from '@/types/triples';
 
@@ -49,11 +50,16 @@ export interface SemanticAnalysisResult {
 export class ItalianSemanticSearchService {
   private embeddingService: GeminiEmbeddingService;
   private vectorStore: ItalianVectorStore;
+  private knowledgeBaseService: ItalianKnowledgeBaseService;
   private isInitialized: boolean = false;
 
   constructor() {
     this.embeddingService = new GeminiEmbeddingService();
     this.vectorStore = new ItalianVectorStore();
+    this.knowledgeBaseService = new ItalianKnowledgeBaseService(
+      this.embeddingService,
+      this.vectorStore
+    );
   }
 
   /**
@@ -68,6 +74,9 @@ export class ItalianSemanticSearchService {
 
       // Initialize vector store
       await this.vectorStore.initialize();
+
+      // Initialize knowledge base if not already populated
+      await this.initializeKnowledgeBase();
 
       this.isInitialized = true;
       console.log('Semantic Search Service initialized successfully');
@@ -570,6 +579,42 @@ export class ItalianSemanticSearchService {
 
     await this.vectorStore.clearAll();
     console.log('Vector database cleared');
+  }
+
+  /**
+   * Initialize knowledge base with Italian cultural data
+   */
+  private async initializeKnowledgeBase(): Promise<void> {
+    try {
+      const isPopulated = await this.knowledgeBaseService.isKnowledgeBasePopulated();
+      
+      if (!isPopulated) {
+        console.log('Knowledge base not populated, starting population...');
+        await this.knowledgeBaseService.populateKnowledgeBase();
+        console.log('Italian knowledge base populated successfully');
+      } else {
+        console.log('Knowledge base already populated');
+        const stats = await this.knowledgeBaseService.getKnowledgeBaseStats();
+        console.log('Knowledge base stats:', stats);
+      }
+    } catch (error) {
+      console.warn('Knowledge base initialization failed, continuing without it:', error);
+      // Don't throw error - service can still work without pre-populated knowledge
+    }
+  }
+
+  /**
+   * Get knowledge base service for external use
+   */
+  getKnowledgeBaseService(): ItalianKnowledgeBaseService {
+    return this.knowledgeBaseService;
+  }
+
+  /**
+   * Get vector store for external use
+   */
+  getVectorStore(): ItalianVectorStore {
+    return this.vectorStore;
   }
 }
 

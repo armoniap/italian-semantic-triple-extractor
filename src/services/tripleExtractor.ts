@@ -14,17 +14,106 @@ import {
 } from '@/types/triples';
 import { ItalianEntity } from '@/types/entities';
 import { GeminiAPIService } from './geminiAPI';
+import ItalianSemanticSearchService, { EnhancedTriple } from './semanticSearch';
+
+export interface EnhancedTripleExtractionResult extends TripleExtractionResult {
+  triples: EnhancedTriple[];
+  semanticInsights: string[];
+  culturalContext: string[];
+}
 
 export class ItalianTripleExtractor {
   private geminiService: GeminiAPIService;
   private predicateMap: Map<string, ItalianPredicate>;
+  private semanticSearchService?: ItalianSemanticSearchService;
+  private useSemanticEnhancement: boolean = false;
 
-  constructor(geminiService: GeminiAPIService) {
+  constructor(
+    geminiService: GeminiAPIService,
+    semanticSearchService?: ItalianSemanticSearchService
+  ) {
     this.geminiService = geminiService;
     this.predicateMap = this.initializeItalianPredicates();
+    
+    if (semanticSearchService) {
+      this.semanticSearchService = semanticSearchService;
+      this.useSemanticEnhancement = true;
+    }
+  }
+
+  /**
+   * Enable or disable semantic enhancement
+   */
+  setSemanticEnhancement(enabled: boolean): void {
+    this.useSemanticEnhancement = enabled && !!this.semanticSearchService;
   }
 
   async extractTriples(
+    text: string,
+    entities?: ItalianEntity[]
+  ): Promise<TripleExtractionResult> {
+    if (this.useSemanticEnhancement && this.semanticSearchService?.isReady()) {
+      return this.extractTriplesWithSemanticEnhancement(text, entities);
+    } else {
+      return this.extractTriplesStandard(text, entities);
+    }
+  }
+
+  /**
+   * Extract triples with semantic enhancement using vector search
+   */
+  async extractTriplesWithSemanticEnhancement(
+    text: string,
+    entities?: ItalianEntity[]
+  ): Promise<EnhancedTripleExtractionResult> {
+    const startTime = Date.now();
+
+    try {
+      console.log('Extracting triples with semantic enhancement...');
+
+      // Step 1: Standard extraction
+      const standardResult = await this.extractTriplesStandard(text, entities);
+
+      // Step 2: Semantic enhancement
+      if (!this.semanticSearchService) {
+        throw new Error('Semantic search service not available');
+      }
+
+      // Get semantic analysis (this will enhance triples with vector search)
+      const semanticAnalysis = await this.semanticSearchService.analyzeText(
+        text,
+        entities || [],
+        standardResult.triples
+      );
+
+      // Step 3: Extract cultural insights for triples
+      const culturalContext = await this.extractTripleCulturalContext(text);
+
+      const processingTime = Date.now() - startTime;
+
+      return {
+        ...standardResult,
+        triples: semanticAnalysis.triples,
+        semanticInsights: semanticAnalysis.culturalInsights,
+        culturalContext,
+        processingTime,
+      };
+    } catch (error) {
+      console.error('Semantic-enhanced triple extraction failed:', error);
+      // Fallback to standard extraction with empty semantic data
+      const standardResult = await this.extractTriplesStandard(text, entities);
+      return {
+        ...standardResult,
+        semanticInsights: [],
+        culturalContext: [],
+      };
+    }
+  }
+
+  /**
+   * Standard triple extraction without semantic enhancement
+   */
+  private async extractTriplesStandard(
     text: string,
     entities?: ItalianEntity[]
   ): Promise<TripleExtractionResult> {
@@ -370,6 +459,77 @@ export class ItalianTripleExtractor {
     });
 
     return predicates;
+  }
+
+  /**
+   * Extract cultural context for triples using Italian knowledge
+   */
+  private async extractTripleCulturalContext(text: string): Promise<string[]> {
+    const culturalKeywords = [
+      'tradizione',
+      'cultura',
+      'storia',
+      'arte',
+      'rinascimento',
+      'romano',
+      'patrimonio',
+      'unesco',
+      'monumento',
+      'teatro',
+      'opera',
+      'festival',
+      'festa',
+      'patrono',
+      'santo',
+      'diocesi',
+      'piazza',
+      'palazzo',
+      'castello',
+      'duomo',
+      'basilica',
+      'museo',
+      'galleria',
+    ];
+
+    const context: string[] = [];
+    const lowercaseText = text.toLowerCase();
+
+    culturalKeywords.forEach(keyword => {
+      if (lowercaseText.includes(keyword)) {
+        // Add contextual information based on cultural keywords found in triples
+        switch (keyword) {
+          case 'rinascimento':
+            context.push('Periodo di rinnovamento culturale italiano (XIV-XVI secolo)');
+            break;
+          case 'romano':
+            context.push('Relativo all\'Impero Romano o all\'architettura romana');
+            break;
+          case 'unesco':
+            context.push('Siti del Patrimonio Mondiale dell\'Umanità UNESCO');
+            break;
+          case 'patrono':
+          case 'santo':
+            context.push('Tradizioni religiose e santi patroni italiani');
+            break;
+          case 'teatro':
+          case 'opera':
+            context.push('Tradizione teatrale e operistica italiana');
+            break;
+          case 'duomo':
+          case 'basilica':
+            context.push('Architettura religiosa italiana');
+            break;
+          case 'museo':
+          case 'galleria':
+            context.push('Patrimonio artistico e culturale italiano');
+            break;
+          default:
+            context.push(`Contesto culturale italiano: ${keyword}`);
+        }
+      }
+    });
+
+    return [...new Set(context)]; // Remove duplicates
   }
 
   // Graph generation methods

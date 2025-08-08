@@ -123,7 +123,10 @@ const useApplicationStore = create<ApplicationState>()(
             geminiService,
             semanticSearchService
           );
-          const tripleExtractor = new ItalianTripleExtractor(geminiService);
+          const tripleExtractor = new ItalianTripleExtractor(
+            geminiService,
+            semanticSearchService
+          );
 
           set({
             geminiService,
@@ -318,13 +321,15 @@ const useApplicationStore = create<ApplicationState>()(
       toggleSemanticEnhancement: () => {
         const {
           entityExtractor,
+          tripleExtractor,
           semanticSearchService,
           useSemanticEnhancement,
         } = get();
 
-        if (entityExtractor && semanticSearchService) {
+        if (entityExtractor && tripleExtractor && semanticSearchService) {
           const newState = !useSemanticEnhancement;
           entityExtractor.setSemanticEnhancement(newState);
+          tripleExtractor.setSemanticEnhancement(newState);
 
           set({ useSemanticEnhancement: newState });
 

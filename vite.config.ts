@@ -17,6 +17,10 @@ export default defineConfig({
     sourcemap: false,
     minify: 'terser',
     rollupOptions: {
+      external: [
+        '@chroma-core/default-embed',
+        'node:process',
+      ],
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],

@@ -4,6 +4,7 @@
  */
 
 import { ChromaClient, Collection, IncludeEnum } from 'chromadb';
+import FallbackVectorStore from './fallbackVectorStore';
 import { EmbeddingResult } from './embeddingService';
 import { ItalianEntity } from '@/types/entities';
 import { SemanticTriple } from '@/types/triples';
@@ -38,8 +39,10 @@ export interface SemanticSearchOptions {
 }
 
 export class ItalianVectorStore {
-  private client: ChromaClient;
+  private client: ChromaClient | null = null;
   private collections: Map<string, Collection> = new Map();
+  private fallbackStore: FallbackVectorStore;
+  private useChromaDB: boolean = false;
 
   // Collection names for different data types
   private readonly COLLECTIONS = {
@@ -50,10 +53,16 @@ export class ItalianVectorStore {
   } as const;
 
   constructor() {
-    // Initialize ChromaDB client - for browser environment
-    this.client = new ChromaClient({
-      path: 'http://localhost:8000', // ChromaDB default port
-    });
+    this.fallbackStore = new FallbackVectorStore();
+    
+    try {
+      // Try to initialize ChromaDB client - for browser environment
+      this.client = new ChromaClient({
+        path: 'http://localhost:8000', // ChromaDB default port
+      });
+    } catch (error) {
+      console.warn('ChromaDB client creation failed, will use fallback store:', error);
+    }
   }
 
   /**
@@ -63,32 +72,52 @@ export class ItalianVectorStore {
     try {
       console.log('Initializing Italian Vector Store...');
 
-      // Create collections for different data types
-      await this.createCollection(this.COLLECTIONS.ENTITIES, {
-        description: 'Italian entities with semantic embeddings',
-        metadata: { language: 'italian', type: 'entities' },
-      });
+      // Try ChromaDB first
+      if (this.client) {
+        try {
+          await this.initializeChromaDB();
+          this.useChromaDB = true;
+          console.log('Vector Store initialized with ChromaDB');
+          return;
+        } catch (error) {
+          console.warn('ChromaDB initialization failed, falling back to IndexedDB:', error);
+        }
+      }
 
-      await this.createCollection(this.COLLECTIONS.TRIPLES, {
-        description: 'Semantic triples from Italian text',
-        metadata: { language: 'italian', type: 'triples' },
-      });
-
-      await this.createCollection(this.COLLECTIONS.KNOWLEDGE, {
-        description: 'Italian cultural and historical knowledge base',
-        metadata: { language: 'italian', type: 'knowledge' },
-      });
-
-      await this.createCollection(this.COLLECTIONS.CHUNKS, {
-        description: 'Text chunks for semantic analysis',
-        metadata: { language: 'italian', type: 'chunks' },
-      });
-
-      console.log('Vector Store initialized successfully');
+      // Fall back to IndexedDB
+      await this.fallbackStore.initialize();
+      this.useChromaDB = false;
+      console.log('Vector Store initialized with IndexedDB fallback');
     } catch (error) {
-      console.error('Vector Store initialization failed:', error);
+      console.error('Vector Store initialization failed completely:', error);
       throw new Error(`Vector Store setup failed: ${error}`);
     }
+  }
+
+  /**
+   * Initialize ChromaDB collections
+   */
+  private async initializeChromaDB(): Promise<void> {
+    // Create collections for different data types
+    await this.createCollection(this.COLLECTIONS.ENTITIES, {
+      description: 'Italian entities with semantic embeddings',
+      metadata: { language: 'italian', type: 'entities' },
+    });
+
+    await this.createCollection(this.COLLECTIONS.TRIPLES, {
+      description: 'Semantic triples from Italian text',
+      metadata: { language: 'italian', type: 'triples' },
+    });
+
+    await this.createCollection(this.COLLECTIONS.KNOWLEDGE, {
+      description: 'Italian cultural and historical knowledge base',
+      metadata: { language: 'italian', type: 'knowledge' },
+    });
+
+    await this.createCollection(this.COLLECTIONS.CHUNKS, {
+      description: 'Text chunks for semantic analysis',
+      metadata: { language: 'italian', type: 'chunks' },
+    });
   }
 
   /**
@@ -98,6 +127,10 @@ export class ItalianVectorStore {
     name: string,
     config?: { description?: string; metadata?: Record<string, any> }
   ): Promise<Collection> {
+    if (!this.client) {
+      throw new Error('ChromaDB client not initialized');
+    }
+
     try {
       // Try to get existing collection first
       let collection = await this.client.getCollection({
@@ -132,6 +165,10 @@ export class ItalianVectorStore {
     entities: ItalianEntity[],
     embeddings: EmbeddingResult[]
   ): Promise<void> {
+    if (!this.useChromaDB) {
+      return this.addEntitiesFallback(entities, embeddings);
+    }
+
     const collection = this.collections.get(this.COLLECTIONS.ENTITIES);
     if (!collection) {
       throw new Error('Entities collection not initialized');
@@ -291,6 +328,9 @@ export class ItalianVectorStore {
     queryEmbedding: number[],
     options: SemanticSearchOptions & { collection?: string } = {}
   ): Promise<SearchResult[]> {
+    if (!this.useChromaDB) {
+      return this.semanticSearchFallback(_query, queryEmbedding, options);
+    }
     const {
       topK = 10,
       threshold = 0.5,
@@ -414,6 +454,10 @@ export class ItalianVectorStore {
    * Get collection statistics
    */
   async getStats(): Promise<Record<string, any>> {
+    if (!this.useChromaDB) {
+      return this.fallbackStore.getStats();
+    }
+
     const stats: Record<string, any> = {};
 
     for (const [name, collection] of this.collections) {
@@ -435,6 +479,13 @@ export class ItalianVectorStore {
    * Clear all collections (for testing or reset)
    */
   async clearAll(): Promise<void> {
+    if (!this.useChromaDB) {
+      await this.fallbackStore.clearAll();
+      return;
+    }
+
+    if (!this.client) return;
+
     for (const [name] of this.collections) {
       try {
         await this.client.deleteCollection({ name });
@@ -452,14 +503,100 @@ export class ItalianVectorStore {
    * Check if vector store is ready
    */
   isReady(): boolean {
-    return this.collections.size > 0;
+    return this.useChromaDB ? this.collections.size > 0 : this.fallbackStore.isReady();
   }
 
   /**
    * Get collection names
    */
   getCollectionNames(): string[] {
-    return Array.from(this.collections.keys());
+    return this.useChromaDB 
+      ? Array.from(this.collections.keys()) 
+      : this.fallbackStore.getCollectionNames();
+  }
+
+  /**
+   * Check if using ChromaDB or fallback
+   */
+  isUsingChromaDB(): boolean {
+    return this.useChromaDB;
+  }
+
+  // Fallback methods for IndexedDB
+  private async addEntitiesFallback(
+    entities: ItalianEntity[],
+    embeddings: EmbeddingResult[]
+  ): Promise<void> {
+    const documents = entities.map((entity, index) => {
+      const embedding = embeddings[index];
+      
+      // Flatten metadata for IndexedDB compatibility
+      const flatMetadata: Record<string, any> = {
+        type: 'entity',
+        entityType: entity.type,
+        confidence: entity.confidence,
+        language: 'it',
+        startOffset: entity.startOffset,
+        endOffset: entity.endOffset,
+        createdAt: Date.now(),
+      };
+      
+      // Add entity metadata safely
+      if (entity.metadata) {
+        Object.entries(entity.metadata).forEach(([key, value]) => {
+          if (value !== null && value !== undefined) {
+            if (typeof value === 'object' && !Array.isArray(value)) {
+              flatMetadata[key] = JSON.stringify(value);
+            } else if (Array.isArray(value)) {
+              flatMetadata[key] = value.join(', ');
+            } else {
+              flatMetadata[key] = value;
+            }
+          }
+        });
+      }
+      
+      return {
+        id: `entity_${entity.id}`,
+        document: entity.text,
+        embedding: embedding.embedding,
+        metadata: flatMetadata,
+      };
+    });
+
+    await this.fallbackStore.storeDocuments(this.COLLECTIONS.ENTITIES, documents);
+    console.log(`Added ${entities.length} entities to fallback store`);
+  }
+
+  private async semanticSearchFallback(
+    _query: string,
+    queryEmbedding: number[],
+    options: SemanticSearchOptions & { collection?: string } = {}
+  ): Promise<SearchResult[]> {
+    const { collection: collectionName } = options;
+
+    // Determine which collections to search
+    const collectionsToSearch = collectionName
+      ? [collectionName]
+      : Object.values(this.COLLECTIONS);
+
+    const allResults: SearchResult[] = [];
+
+    for (const name of collectionsToSearch) {
+      try {
+        const results = await this.fallbackStore.semanticSearch(name, queryEmbedding, options);
+        allResults.push(...results);
+      } catch (error) {
+        console.error(`Fallback search failed in collection ${name}:`, error);
+      }
+    }
+
+    const { topK = 10 } = options;
+
+    // Sort by similarity and limit results
+    return allResults
+      .sort((a, b) => b.similarity - a.similarity)
+      .slice(0, topK);
   }
 }
 

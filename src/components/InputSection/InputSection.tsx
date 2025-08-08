@@ -7,6 +7,8 @@ import {
   CheckCircle,
   Globe,
   Lightbulb,
+  Database,
+  Zap,
 } from 'lucide-react';
 import { useApplication } from '@/store/ApplicationStore';
 
@@ -19,6 +21,9 @@ const InputSection: React.FC = () => {
     clearResults,
     isApiKeyValid,
     setAnalysisError,
+    useSemanticEnhancement,
+    toggleSemanticEnhancement,
+    semanticSearchService,
   } = useApplication();
 
   const [text, setText] = useState(currentText || '');
@@ -396,6 +401,70 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
               className="bg-italian-green h-2 rounded-full transition-all duration-300"
               style={{ width: `${analysisProgress}%` }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Semantic Enhancement Toggle */}
+      {semanticSearchService && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <Database className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                  Analisi Semantica Avanzata
+                </h4>
+                <p className="text-xs text-blue-700 dark:text-blue-300 mb-2">
+                  Utilizza il database vettoriale per relazioni semantiche più ricche e contesto culturale italiano.
+                </p>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className={`flex items-center space-x-1 ${
+                    semanticSearchService?.isReady() 
+                      ? 'text-green-600 dark:text-green-400' 
+                      : 'text-yellow-600 dark:text-yellow-400'
+                  }`}>
+                    <div className={`w-2 h-2 rounded-full ${
+                      semanticSearchService?.isReady() 
+                        ? 'bg-green-500' 
+                        : 'bg-yellow-500'
+                    }`} />
+                    <span>
+                      {semanticSearchService?.isReady() 
+                        ? semanticSearchService.getVectorStore()?.isUsingChromaDB()
+                          ? 'ChromaDB connesso' 
+                          : 'IndexedDB attivo'
+                        : 'Vector DB non disponibile'}
+                    </span>
+                  </div>
+                  {useSemanticEnhancement && (
+                    <div className="flex items-center space-x-1 text-blue-600 dark:text-blue-400">
+                      <Zap className="w-3 h-3" />
+                      <span>Attivo</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex-shrink-0">
+              <button
+                onClick={toggleSemanticEnhancement}
+                disabled={!semanticSearchService?.isReady() || isAnalyzing}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                  useSemanticEnhancement
+                    ? 'bg-blue-600'
+                    : 'bg-gray-200 dark:bg-gray-700'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    useSemanticEnhancement ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
       )}
