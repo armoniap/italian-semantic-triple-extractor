@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Tool per l'estrazione di entità e triple semantiche da testo italiano utilizzando l'API Google Gemini",
-  "homepage": "https://username.github.io/triple",
+  "homepage": "https://armoniap.github.io/italian-semantic-triple-extractor",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -59,7 +59,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/username/triple.git"
+    "url": "git+https://github.com/armoniap/italian-semantic-triple-extractor.git"
   },
   "keywords": [
     "italian",
