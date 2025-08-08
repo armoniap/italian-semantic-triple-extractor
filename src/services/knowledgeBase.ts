@@ -106,21 +106,52 @@ export class ItalianKnowledgeBaseService {
           };
         });
 
-        // Add to vector store
-        const collection = await this.vectorStore['createCollection'](
-          'italian_knowledge_base',
-          {
-            description: 'Italian cultural and historical knowledge base',
-            metadata: { language: 'italian', type: 'knowledge' },
-          }
-        );
+        // Add to vector store using the public interface instead of private ChromaDB methods
+        if (this.vectorStore.isUsingChromaDB()) {
+          // For ChromaDB, we need to use the private method (if available)
+          try {
+            const collection = await this.vectorStore['createCollection'](
+              'italian_knowledge_base',
+              {
+                description: 'Italian cultural and historical knowledge base',
+                metadata: { language: 'italian', type: 'knowledge' },
+              }
+            );
 
-        await collection.add({
-          ids: documents.map(d => d.id),
-          documents: documents.map(d => d.document),
-          embeddings: documents.map(d => d.embedding),
-          metadatas: documents.map(d => d.metadata),
-        });
+            await collection.add({
+              ids: documents.map(d => d.id),
+              documents: documents.map(d => d.document),
+              embeddings: documents.map(d => d.embedding),
+              metadatas: documents.map(d => d.metadata),
+            });
+          } catch (error) {
+            console.warn(
+              'ChromaDB collection creation failed, switching to fallback:',
+              error
+            );
+            // Fall back to the IndexedDB storage method
+            await this.vectorStore['fallbackStore'].storeDocuments(
+              'italian_knowledge_base',
+              documents.map(d => ({
+                id: d.id,
+                document: d.document,
+                embedding: d.embedding,
+                metadata: d.metadata,
+              }))
+            );
+          }
+        } else {
+          // Use fallback store directly
+          await this.vectorStore['fallbackStore'].storeDocuments(
+            'italian_knowledge_base',
+            documents.map(d => ({
+              id: d.id,
+              document: d.document,
+              embedding: d.embedding,
+              metadata: d.metadata,
+            }))
+          );
+        }
 
         processedCount += batch.length;
         console.log(

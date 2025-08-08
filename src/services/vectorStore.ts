@@ -55,15 +55,25 @@ export class ItalianVectorStore {
   constructor() {
     this.fallbackStore = new FallbackVectorStore();
 
-    try {
-      // Try to initialize ChromaDB client - for browser environment
-      this.client = new ChromaClient({
-        path: 'http://localhost:8000', // ChromaDB default port
-      });
-    } catch (error) {
-      console.warn(
-        'ChromaDB client creation failed, will use fallback store:',
-        error
+    // Check if we're in a browser environment - always use fallback in browser
+    const isBrowser =
+      typeof window !== 'undefined' && typeof document !== 'undefined';
+
+    if (!isBrowser) {
+      try {
+        // Only try ChromaDB in Node.js environment
+        this.client = new ChromaClient({
+          path: 'http://localhost:8000', // ChromaDB default port
+        });
+      } catch (error) {
+        console.warn(
+          'ChromaDB client creation failed, will use fallback store:',
+          error
+        );
+      }
+    } else {
+      console.log(
+        'Browser environment detected, using IndexedDB fallback store'
       );
     }
   }
@@ -75,25 +85,36 @@ export class ItalianVectorStore {
     try {
       console.log('Initializing Italian Vector Store...');
 
-      // Try ChromaDB first
-      if (this.client) {
-        try {
-          await this.initializeChromaDB();
-          this.useChromaDB = true;
-          console.log('Vector Store initialized with ChromaDB');
-          return;
-        } catch (error) {
-          console.warn(
-            'ChromaDB initialization failed, falling back to IndexedDB:',
-            error
-          );
-        }
+      // Check if we're in a browser environment
+      const isBrowser =
+        typeof window !== 'undefined' && typeof document !== 'undefined';
+
+      // In browser environment, always use fallback to avoid ChromaDB dependency issues
+      if (isBrowser || !this.client) {
+        await this.fallbackStore.initialize();
+        this.useChromaDB = false;
+        console.log(
+          'Vector Store initialized with IndexedDB fallback (browser mode)'
+        );
+        return;
       }
 
-      // Fall back to IndexedDB
-      await this.fallbackStore.initialize();
-      this.useChromaDB = false;
-      console.log('Vector Store initialized with IndexedDB fallback');
+      // Only try ChromaDB in Node.js environment
+      try {
+        await this.initializeChromaDB();
+        this.useChromaDB = true;
+        console.log('Vector Store initialized with ChromaDB (Node.js mode)');
+        return;
+      } catch (error) {
+        console.warn(
+          'ChromaDB initialization failed, falling back to IndexedDB:',
+          error
+        );
+        // Fall back to IndexedDB
+        await this.fallbackStore.initialize();
+        this.useChromaDB = false;
+        console.log('Vector Store initialized with IndexedDB fallback');
+      }
     } catch (error) {
       console.error('Vector Store initialization failed completely:', error);
       throw new Error(`Vector Store setup failed: ${error}`);
