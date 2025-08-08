@@ -586,8 +586,9 @@ export class ItalianSemanticSearchService {
    */
   private async initializeKnowledgeBase(): Promise<void> {
     try {
-      const isPopulated = await this.knowledgeBaseService.isKnowledgeBasePopulated();
-      
+      const isPopulated =
+        await this.knowledgeBaseService.isKnowledgeBasePopulated();
+
       if (!isPopulated) {
         console.log('Knowledge base not populated, starting population...');
         await this.knowledgeBaseService.populateKnowledgeBase();
@@ -598,7 +599,10 @@ export class ItalianSemanticSearchService {
         console.log('Knowledge base stats:', stats);
       }
     } catch (error) {
-      console.warn('Knowledge base initialization failed, continuing without it:', error);
+      console.warn(
+        'Knowledge base initialization failed, continuing without it:',
+        error
+      );
       // Don't throw error - service can still work without pre-populated knowledge
     }
   }

@@ -34,7 +34,7 @@ export class ItalianTripleExtractor {
   ) {
     this.geminiService = geminiService;
     this.predicateMap = this.initializeItalianPredicates();
-    
+
     if (semanticSearchService) {
       this.semanticSearchService = semanticSearchService;
       this.useSemanticEnhancement = true;
@@ -499,13 +499,17 @@ export class ItalianTripleExtractor {
         // Add contextual information based on cultural keywords found in triples
         switch (keyword) {
           case 'rinascimento':
-            context.push('Periodo di rinnovamento culturale italiano (XIV-XVI secolo)');
+            context.push(
+              'Periodo di rinnovamento culturale italiano (XIV-XVI secolo)'
+            );
             break;
           case 'romano':
-            context.push('Relativo all\'Impero Romano o all\'architettura romana');
+            context.push(
+              "Relativo all'Impero Romano o all'architettura romana"
+            );
             break;
           case 'unesco':
-            context.push('Siti del Patrimonio Mondiale dell\'Umanità UNESCO');
+            context.push("Siti del Patrimonio Mondiale dell'Umanità UNESCO");
             break;
           case 'patrono':
           case 'santo':

@@ -17,7 +17,7 @@ export class FallbackVectorStore {
   private dbName: string = 'italian-vector-store';
   private dbVersion: number = 1;
   private db: IDBDatabase | null = null;
-  
+
   private readonly COLLECTIONS = {
     ENTITIES: 'italian_entities',
     TRIPLES: 'semantic_triples',
@@ -36,17 +36,21 @@ export class FallbackVectorStore {
 
       request.onsuccess = () => {
         this.db = request.result;
-        console.log('Fallback Vector Store (IndexedDB) initialized successfully');
+        console.log(
+          'Fallback Vector Store (IndexedDB) initialized successfully'
+        );
         resolve();
       };
 
-      request.onupgradeneeded = (event) => {
+      request.onupgradeneeded = event => {
         const db = (event.target as IDBOpenDBRequest).result;
-        
+
         // Create object stores for each collection
         Object.values(this.COLLECTIONS).forEach(collectionName => {
           if (!db.objectStoreNames.contains(collectionName)) {
-            const store = db.createObjectStore(collectionName, { keyPath: 'id' });
+            const store = db.createObjectStore(collectionName, {
+              keyPath: 'id',
+            });
             store.createIndex('timestamp', 'timestamp', { unique: false });
             store.createIndex('type', 'metadata.type', { unique: false });
           }
@@ -102,11 +106,7 @@ export class FallbackVectorStore {
   ): Promise<SearchResult[]> {
     if (!this.db) throw new Error('Database not initialized');
 
-    const {
-      topK = 10,
-      threshold = 0.5,
-      filter = {},
-    } = options;
+    const { topK = 10, threshold = 0.5, filter = {} } = options;
 
     // Get all documents from collection
     const documents = await this.getAllDocuments(collectionName);
@@ -114,7 +114,7 @@ export class FallbackVectorStore {
     // Filter documents based on metadata filter
     const filteredDocs = documents.filter(doc => {
       if (Object.keys(filter).length === 0) return true;
-      
+
       return Object.entries(filter).every(([key, value]) => {
         const metadataValue = this.getNestedProperty(doc.metadata, key);
         return metadataValue === value;
@@ -123,10 +123,10 @@ export class FallbackVectorStore {
 
     // Calculate similarities
     const results: SearchResult[] = [];
-    
+
     for (const doc of filteredDocs) {
       const similarity = this.cosineSimilarity(queryEmbedding, doc.embedding);
-      
+
       if (similarity >= threshold) {
         results.push({
           document: {
@@ -147,15 +147,15 @@ export class FallbackVectorStore {
     }
 
     // Sort by similarity and limit results
-    return results
-      .sort((a, b) => b.similarity - a.similarity)
-      .slice(0, topK);
+    return results.sort((a, b) => b.similarity - a.similarity).slice(0, topK);
   }
 
   /**
    * Get all documents from a collection
    */
-  private async getAllDocuments(collectionName: string): Promise<StoredDocument[]> {
+  private async getAllDocuments(
+    collectionName: string
+  ): Promise<StoredDocument[]> {
     if (!this.db) throw new Error('Database not initialized');
 
     return new Promise((resolve, reject) => {

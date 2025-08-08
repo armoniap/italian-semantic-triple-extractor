@@ -54,14 +54,17 @@ export class ItalianVectorStore {
 
   constructor() {
     this.fallbackStore = new FallbackVectorStore();
-    
+
     try {
       // Try to initialize ChromaDB client - for browser environment
       this.client = new ChromaClient({
         path: 'http://localhost:8000', // ChromaDB default port
       });
     } catch (error) {
-      console.warn('ChromaDB client creation failed, will use fallback store:', error);
+      console.warn(
+        'ChromaDB client creation failed, will use fallback store:',
+        error
+      );
     }
   }
 
@@ -80,7 +83,10 @@ export class ItalianVectorStore {
           console.log('Vector Store initialized with ChromaDB');
           return;
         } catch (error) {
-          console.warn('ChromaDB initialization failed, falling back to IndexedDB:', error);
+          console.warn(
+            'ChromaDB initialization failed, falling back to IndexedDB:',
+            error
+          );
         }
       }
 
@@ -133,7 +139,7 @@ export class ItalianVectorStore {
 
     try {
       // Try to get existing collection first
-      let collection = await this.client.getCollection({
+      const collection = await this.client.getCollection({
         name,
         embeddingFunction: undefined, // Will use default
       });
@@ -176,7 +182,7 @@ export class ItalianVectorStore {
 
     const documents = entities.map((entity, index) => {
       const embedding = embeddings[index];
-      
+
       // Flatten metadata to ensure ChromaDB compatibility
       const flatMetadata: Record<string, string | number | boolean | null> = {
         type: 'entity' as const,
@@ -187,7 +193,7 @@ export class ItalianVectorStore {
         endOffset: entity.endOffset,
         createdAt: Date.now(),
       };
-      
+
       // Safely add entity metadata, flattening any nested objects
       if (entity.metadata) {
         Object.entries(entity.metadata).forEach(([key, value]) => {
@@ -199,12 +205,17 @@ export class ItalianVectorStore {
               // Convert object to string representation
               flatMetadata[key] = JSON.stringify(value);
             }
-          } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || value === null) {
+          } else if (
+            typeof value === 'string' ||
+            typeof value === 'number' ||
+            typeof value === 'boolean' ||
+            value === null
+          ) {
             flatMetadata[key] = value;
           }
         });
       }
-      
+
       return {
         id: `entity_${entity.id}`,
         document: entity.text,
@@ -373,17 +384,22 @@ export class ItalianVectorStore {
           for (let i = 0; i < documents.length; i++) {
             const distance = distances[i];
             if (distance === null || distance === undefined) continue;
-            
+
             const similarity = 1 - distance; // Convert distance to similarity
             const docText = documents[i];
             const docId = ids[i];
-            
+
             if (similarity >= threshold && docText && docId) {
               allResults.push({
                 document: {
                   id: docId,
                   text: docText,
-                  embedding: (includeEmbeddings && embeddings[i] && Array.isArray(embeddings[i])) ? (embeddings[i] as number[]) : [],
+                  embedding:
+                    includeEmbeddings &&
+                    embeddings[i] &&
+                    Array.isArray(embeddings[i])
+                      ? (embeddings[i] as number[])
+                      : [],
                   metadata: (metadatas[i] as VectorDocument['metadata']) || {
                     type: 'chunk' as const,
                     language: 'it' as const,
@@ -503,15 +519,17 @@ export class ItalianVectorStore {
    * Check if vector store is ready
    */
   isReady(): boolean {
-    return this.useChromaDB ? this.collections.size > 0 : this.fallbackStore.isReady();
+    return this.useChromaDB
+      ? this.collections.size > 0
+      : this.fallbackStore.isReady();
   }
 
   /**
    * Get collection names
    */
   getCollectionNames(): string[] {
-    return this.useChromaDB 
-      ? Array.from(this.collections.keys()) 
+    return this.useChromaDB
+      ? Array.from(this.collections.keys())
       : this.fallbackStore.getCollectionNames();
   }
 
@@ -529,7 +547,7 @@ export class ItalianVectorStore {
   ): Promise<void> {
     const documents = entities.map((entity, index) => {
       const embedding = embeddings[index];
-      
+
       // Flatten metadata for IndexedDB compatibility
       const flatMetadata: Record<string, any> = {
         type: 'entity',
@@ -540,7 +558,7 @@ export class ItalianVectorStore {
         endOffset: entity.endOffset,
         createdAt: Date.now(),
       };
-      
+
       // Add entity metadata safely
       if (entity.metadata) {
         Object.entries(entity.metadata).forEach(([key, value]) => {
@@ -555,7 +573,7 @@ export class ItalianVectorStore {
           }
         });
       }
-      
+
       return {
         id: `entity_${entity.id}`,
         document: entity.text,
@@ -564,7 +582,10 @@ export class ItalianVectorStore {
       };
     });
 
-    await this.fallbackStore.storeDocuments(this.COLLECTIONS.ENTITIES, documents);
+    await this.fallbackStore.storeDocuments(
+      this.COLLECTIONS.ENTITIES,
+      documents
+    );
     console.log(`Added ${entities.length} entities to fallback store`);
   }
 
@@ -584,7 +605,11 @@ export class ItalianVectorStore {
 
     for (const name of collectionsToSearch) {
       try {
-        const results = await this.fallbackStore.semanticSearch(name, queryEmbedding, options);
+        const results = await this.fallbackStore.semanticSearch(
+          name,
+          queryEmbedding,
+          options
+        );
         allResults.push(...results);
       } catch (error) {
         console.error(`Fallback search failed in collection ${name}:`, error);

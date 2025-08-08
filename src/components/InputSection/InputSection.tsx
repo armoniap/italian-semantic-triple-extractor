@@ -418,23 +418,30 @@ La città fu fondata dai Celti e successivamente conquistata dai Romani..."
                   Analisi Semantica Avanzata
                 </h4>
                 <p className="text-xs text-blue-700 dark:text-blue-300 mb-2">
-                  Utilizza il database vettoriale per relazioni semantiche più ricche e contesto culturale italiano.
+                  Utilizza il database vettoriale per relazioni semantiche più
+                  ricche e contesto culturale italiano.
                 </p>
                 <div className="flex items-center space-x-2 text-xs">
-                  <div className={`flex items-center space-x-1 ${
-                    semanticSearchService?.isReady() 
-                      ? 'text-green-600 dark:text-green-400' 
-                      : 'text-yellow-600 dark:text-yellow-400'
-                  }`}>
-                    <div className={`w-2 h-2 rounded-full ${
-                      semanticSearchService?.isReady() 
-                        ? 'bg-green-500' 
-                        : 'bg-yellow-500'
-                    }`} />
+                  <div
+                    className={`flex items-center space-x-1 ${
+                      semanticSearchService?.isReady()
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-yellow-600 dark:text-yellow-400'
+                    }`}
+                  >
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        semanticSearchService?.isReady()
+                          ? 'bg-green-500'
+                          : 'bg-yellow-500'
+                      }`}
+                    />
                     <span>
-                      {semanticSearchService?.isReady() 
-                        ? semanticSearchService.getVectorStore()?.isUsingChromaDB()
-                          ? 'ChromaDB connesso' 
+                      {semanticSearchService?.isReady()
+                        ? semanticSearchService
+                            .getVectorStore()
+                            ?.isUsingChromaDB()
+                          ? 'ChromaDB connesso'
                           : 'IndexedDB attivo'
                         : 'Vector DB non disponibile'}
                     </span>

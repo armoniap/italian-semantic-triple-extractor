@@ -9,7 +9,13 @@ import ItalianVectorStore from './vectorStore';
 export interface ItalianKnowledgeItem {
   id: string;
   text: string;
-  category: 'historical' | 'cultural' | 'geographical' | 'artistic' | 'culinary' | 'religious';
+  category:
+    | 'historical'
+    | 'cultural'
+    | 'geographical'
+    | 'artistic'
+    | 'culinary'
+    | 'religious';
   subcategory?: string;
   region?: string;
   period?: string;
@@ -37,16 +43,18 @@ export class ItalianKnowledgeBaseService {
 
     try {
       const knowledgeItems = this.generateItalianKnowledgeItems();
-      
+
       // Process in batches to avoid overwhelming the API
       const batchSize = 20;
       let processedCount = 0;
 
       for (let i = 0; i < knowledgeItems.length; i += batchSize) {
         const batch = knowledgeItems.slice(i, i + batchSize);
-        
-        console.log(`Processing knowledge batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(knowledgeItems.length/batchSize)}`);
-        
+
+        console.log(
+          `Processing knowledge batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(knowledgeItems.length / batchSize)}`
+        );
+
         // Generate embeddings for the batch
         const texts = batch.map(item => item.text);
         const embeddingsResult = await this.embeddingService.embedTexts(
@@ -57,13 +65,14 @@ export class ItalianKnowledgeBaseService {
         // Prepare documents for vector store
         const documents = batch.map((item, index) => {
           // Flatten metadata to ensure ChromaDB compatibility (no undefined values)
-          const flatMetadata: Record<string, string | number | boolean | null> = {
-            type: 'knowledge' as const,
-            category: item.category,
-            importance: item.importance,
-            language: 'it' as const,
-            createdAt: Date.now(),
-          };
+          const flatMetadata: Record<string, string | number | boolean | null> =
+            {
+              type: 'knowledge' as const,
+              category: item.category,
+              importance: item.importance,
+              language: 'it' as const,
+              createdAt: Date.now(),
+            };
 
           // Add optional fields only if they exist
           if (item.subcategory) flatMetadata.subcategory = item.subcategory;
@@ -78,7 +87,11 @@ export class ItalianKnowledgeBaseService {
                   flatMetadata[key] = JSON.stringify(value);
                 } else if (Array.isArray(value)) {
                   flatMetadata[key] = value.join(', ');
-                } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+                } else if (
+                  typeof value === 'string' ||
+                  typeof value === 'number' ||
+                  typeof value === 'boolean'
+                ) {
                   flatMetadata[key] = value;
                 }
               }
@@ -94,10 +107,13 @@ export class ItalianKnowledgeBaseService {
         });
 
         // Add to vector store
-        const collection = await this.vectorStore['createCollection']('italian_knowledge_base', {
-          description: 'Italian cultural and historical knowledge base',
-          metadata: { language: 'italian', type: 'knowledge' },
-        });
+        const collection = await this.vectorStore['createCollection'](
+          'italian_knowledge_base',
+          {
+            description: 'Italian cultural and historical knowledge base',
+            metadata: { language: 'italian', type: 'knowledge' },
+          }
+        );
 
         await collection.add({
           ids: documents.map(d => d.id),
@@ -107,7 +123,9 @@ export class ItalianKnowledgeBaseService {
         });
 
         processedCount += batch.length;
-        console.log(`Processed ${processedCount}/${knowledgeItems.length} knowledge items`);
+        console.log(
+          `Processed ${processedCount}/${knowledgeItems.length} knowledge items`
+        );
 
         // Rate limiting
         if (i + batchSize < knowledgeItems.length) {
@@ -115,7 +133,9 @@ export class ItalianKnowledgeBaseService {
         }
       }
 
-      console.log(`Italian knowledge base populated with ${processedCount} items`);
+      console.log(
+        `Italian knowledge base populated with ${processedCount} items`
+      );
     } catch (error) {
       console.error('Failed to populate knowledge base:', error);
       throw error;
@@ -130,19 +150,19 @@ export class ItalianKnowledgeBaseService {
 
     // Historical figures
     items.push(...this.getHistoricalFigures());
-    
+
     // Monuments and landmarks
     items.push(...this.getMonumentsAndLandmarks());
-    
+
     // Cultural traditions
     items.push(...this.getCulturalTraditions());
-    
+
     // Regional specialties
     items.push(...this.getRegionalSpecialties());
-    
+
     // Religious sites and figures
     items.push(...this.getReligiousSites());
-    
+
     // Artistic movements and works
     items.push(...this.getArtisticWorks());
 
@@ -153,7 +173,7 @@ export class ItalianKnowledgeBaseService {
     return [
       {
         id: 'leonardo_da_vinci',
-        text: 'Leonardo da Vinci nacque a Vinci nel 1452. Fu pittore, inventore, scienziato e ingegnere del Rinascimento. Dipinse la Gioconda e L\'Ultima Cena. Morì in Francia nel 1519.',
+        text: "Leonardo da Vinci nacque a Vinci nel 1452. Fu pittore, inventore, scienziato e ingegnere del Rinascimento. Dipinse la Gioconda e L'Ultima Cena. Morì in Francia nel 1519.",
         category: 'historical',
         subcategory: 'renaissance_artist',
         region: 'Toscana',
@@ -202,7 +222,7 @@ export class ItalianKnowledgeBaseService {
       },
       {
         id: 'giuseppe_garibaldi',
-        text: 'Giuseppe Garibaldi nacque a Nizza nel 1807. Generale e patriota, eroe dell\'unificazione italiana. Guidò la spedizione dei Mille per liberare il Sud Italia. Morì a Caprera nel 1882.',
+        text: "Giuseppe Garibaldi nacque a Nizza nel 1807. Generale e patriota, eroe dell'unificazione italiana. Guidò la spedizione dei Mille per liberare il Sud Italia. Morì a Caprera nel 1882.",
         category: 'historical',
         subcategory: 'patriot',
         region: 'Sardegna',
@@ -214,7 +234,7 @@ export class ItalianKnowledgeBaseService {
           birthPlace: 'Nizza',
           occupation: ['generale', 'patriota'],
           famousEvents: ['Spedizione dei Mille'],
-          significance: 'eroe dell\'unificazione italiana',
+          significance: "eroe dell'unificazione italiana",
         },
       },
     ];
@@ -224,7 +244,7 @@ export class ItalianKnowledgeBaseService {
     return [
       {
         id: 'colosseo_roma',
-        text: 'Il Colosseo si trova nel centro di Roma. Anfiteatro romano costruito tra il 70 e l\'80 d.C. Patrimonio UNESCO dal 1980. Simbolo di Roma e dell\'Impero Romano.',
+        text: "Il Colosseo si trova nel centro di Roma. Anfiteatro romano costruito tra il 70 e l'80 d.C. Patrimonio UNESCO dal 1980. Simbolo di Roma e dell'Impero Romano.",
         category: 'geographical',
         subcategory: 'monument',
         region: 'Lazio',
@@ -240,7 +260,7 @@ export class ItalianKnowledgeBaseService {
       },
       {
         id: 'torre_di_pisa',
-        text: 'La Torre di Pisa si trova in Piazza dei Miracoli a Pisa. Campanile pendente costruito nel XII secolo. Patrimonio UNESCO. Simbolo della Toscana e dell\'architettura pisana.',
+        text: "La Torre di Pisa si trova in Piazza dei Miracoli a Pisa. Campanile pendente costruito nel XII secolo. Patrimonio UNESCO. Simbolo della Toscana e dell'architettura pisana.",
         category: 'geographical',
         subcategory: 'monument',
         region: 'Toscana',
@@ -307,7 +327,7 @@ export class ItalianKnowledgeBaseService {
       },
       {
         id: 'palio_siena',
-        text: 'Il Palio di Siena si corre in Piazza del Campo due volte l\'anno. Corsa di cavalli tra le contrade senesi. Tradizione medievale che risale al 1633. Simbolo dell\'identità senese.',
+        text: "Il Palio di Siena si corre in Piazza del Campo due volte l'anno. Corsa di cavalli tra le contrade senesi. Tradizione medievale che risale al 1633. Simbolo dell'identità senese.",
         category: 'cultural',
         subcategory: 'palio',
         region: 'Toscana',
@@ -316,14 +336,14 @@ export class ItalianKnowledgeBaseService {
         metadata: {
           city: 'Siena',
           location: 'Piazza del Campo',
-          frequency: 'due volte l\'anno',
+          frequency: "due volte l'anno",
           startYear: 1633,
           participants: 'contrade senesi',
         },
       },
       {
         id: 'opera_italiana',
-        text: 'L\'opera italiana è nata nel XVI secolo. La Scala di Milano è il teatro più famoso. Compositori come Verdi e Puccini sono conosciuti in tutto il mondo. Patrimonio culturale italiano.',
+        text: "L'opera italiana è nata nel XVI secolo. La Scala di Milano è il teatro più famoso. Compositori come Verdi e Puccini sono conosciuti in tutto il mondo. Patrimonio culturale italiano.",
         category: 'cultural',
         subcategory: 'music',
         importance: 'high',
@@ -403,7 +423,7 @@ export class ItalianKnowledgeBaseService {
       },
       {
         id: 'assisi_francesco',
-        text: 'Assisi è la città natale di San Francesco. Basilica di San Francesco patrimonio UNESCO. Meta di pellegrinaggio cristiano. Centro spirituale dell\'Umbria.',
+        text: "Assisi è la città natale di San Francesco. Basilica di San Francesco patrimonio UNESCO. Meta di pellegrinaggio cristiano. Centro spirituale dell'Umbria.",
         category: 'religious',
         subcategory: 'pilgrimage_site',
         region: 'Umbria',
@@ -412,7 +432,7 @@ export class ItalianKnowledgeBaseService {
           saint: 'San Francesco',
           unescoSite: true,
           role: 'pellegrinaggio cristiano',
-          significance: 'centro spirituale dell\'Umbria',
+          significance: "centro spirituale dell'Umbria",
         },
       },
     ];
@@ -437,7 +457,7 @@ export class ItalianKnowledgeBaseService {
       },
       {
         id: 'david_michelangelo',
-        text: 'Il David di Michelangelo si trova alla Galleria dell\'Accademia di Firenze. Scolpito nel marmo di Carrara tra il 1501 e il 1504. Alto 5,17 metri. Simbolo della Repubblica Fiorentina.',
+        text: "Il David di Michelangelo si trova alla Galleria dell'Accademia di Firenze. Scolpito nel marmo di Carrara tra il 1501 e il 1504. Alto 5,17 metri. Simbolo della Repubblica Fiorentina.",
         category: 'artistic',
         subcategory: 'sculpture',
         region: 'Toscana',
@@ -445,7 +465,7 @@ export class ItalianKnowledgeBaseService {
         importance: 'high',
         metadata: {
           artist: 'Michelangelo',
-          location: 'Galleria dell\'Accademia, Firenze',
+          location: "Galleria dell'Accademia, Firenze",
           material: 'marmo di Carrara',
           created: '1501-1504',
           height: '5,17 metri',
