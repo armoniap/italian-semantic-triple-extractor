@@ -34,7 +34,7 @@ export interface EmbeddingConfig {
 export class GeminiEmbeddingService {
   private genAI: GoogleGenerativeAI | null = null;
   private readonly defaultConfig: EmbeddingConfig = {
-    model: 'gemini-embedding-001', // Latest embedding model
+    model: 'text-embedding-004', // Latest supported embedding model
     taskType: TaskType.SEMANTIC_SIMILARITY,
     outputDimensionality: 768, // Balanced performance/accuracy
   };
@@ -300,22 +300,22 @@ export class GeminiEmbeddingService {
   ): EmbeddingConfig {
     const configs: Record<string, EmbeddingConfig> = {
       query: {
-        model: 'gemini-embedding-001',
+        model: 'text-embedding-004',
         taskType: TaskType.RETRIEVAL_QUERY,
         outputDimensionality: dimensions,
       },
       document: {
-        model: 'gemini-embedding-001',
+        model: 'text-embedding-004',
         taskType: TaskType.RETRIEVAL_DOCUMENT,
         outputDimensionality: dimensions,
       },
       similarity: {
-        model: 'gemini-embedding-001',
+        model: 'text-embedding-004',
         taskType: TaskType.SEMANTIC_SIMILARITY,
         outputDimensionality: dimensions,
       },
       classification: {
-        model: 'gemini-embedding-001',
+        model: 'text-embedding-004',
         taskType: TaskType.CLASSIFICATION,
         outputDimensionality: dimensions,
       },
