@@ -31,67 +31,66 @@ class PerformanceTester {
   private geminiService: GeminiAPIService;
   private entityExtractor: ItalianEntityExtractor;
   private tripleExtractor: ItalianTripleExtractor;
-  private semanticSearchService: ItalianSemanticSearchService;
   private metrics: PerformanceMetrics[] = [];
 
   constructor(apiKey: string) {
     this.geminiService = new GeminiAPIService(apiKey);
     this.entityExtractor = new ItalianEntityExtractor(this.geminiService);
     this.tripleExtractor = new ItalianTripleExtractor(this.geminiService);
-    this.semanticSearchService = new ItalianSemanticSearchService();
+    
+    // Initialize semantic search service for potential future use
+    new ItalianSemanticSearchService();
   }
 
   /**
    * High-precision timing utility
    */
-  private measurePerformance<T>(
+  private async measurePerformance<T>(
     name: string, 
     fn: () => Promise<T>,
     tokensProcessed: number = 0
   ): Promise<{ result: T; metrics: PerformanceMetrics }> {
-    return new Promise(async (resolve) => {
       // Measure memory before
       const memoryBefore = this.getMemoryUsage();
       
       // Start timing
       const startTime = performance.now();
       
-      try {
-        const result = await fn();
-        
-        // End timing
-        const endTime = performance.now();
-        const executionTime = endTime - startTime;
-        
-        // Measure memory after
-        const memoryAfter = this.getMemoryUsage();
-        const memoryUsed = memoryAfter - memoryBefore;
-        
-        const metrics: PerformanceMetrics = {
-          name,
-          executionTime,
-          memoryUsed,
-          apiCalls: 1, // Will be updated by specific tests
-          tokensProcessed,
-          throughputPerSecond: tokensProcessed / (executionTime / 1000)
-        };
-        
-        this.metrics.push(metrics);
-        resolve({ result, metrics });
-        
-      } catch (error) {
-        console.error(`Performance test failed for ${name}:`, error);
-        throw error;
-      }
-    });
+    try {
+      const result = await fn();
+      
+      // End timing
+      const endTime = performance.now();
+      const executionTime = endTime - startTime;
+      
+      // Measure memory after
+      const memoryAfter = this.getMemoryUsage();
+      const memoryUsed = memoryAfter - memoryBefore;
+      
+      const metrics: PerformanceMetrics = {
+        name,
+        executionTime,
+        memoryUsed,
+        apiCalls: 1, // Will be updated by specific tests
+        tokensProcessed,
+        throughputPerSecond: tokensProcessed / (executionTime / 1000)
+      };
+      
+      this.metrics.push(metrics);
+      return { result, metrics };
+      
+    } catch (error) {
+      console.error(`Performance test failed for ${name}:`, error);
+      throw error;
+    }
   }
 
   /**
    * Get current memory usage in MB
    */
   private getMemoryUsage(): number {
-    if (typeof performance !== 'undefined' && performance.memory) {
-      return performance.memory.usedJSHeapSize / 1024 / 1024;
+    if (typeof performance !== 'undefined' && (performance as any).memory) {
+      return (performance as any).memory.usedJSHeapSize / 1024 / 1024;
     }
     // Fallback for Node.js environment
     if (typeof process !== 'undefined' && process.memoryUsage) {

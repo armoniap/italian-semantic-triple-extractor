@@ -4,6 +4,8 @@
  */
 
 import PerformanceTester, { TEST_CONFIG } from './performance.test';
+import * as fs from 'fs';
+import * as path from 'path';
 
 interface ComparisonResult {
   testName: string;
@@ -169,8 +171,6 @@ class PerformanceRunner {
    * Save results to JSON file for persistence
    */
   private saveResultsToFile(type: 'baseline' | 'optimized', results: any[]): void {
-    const fs = require('fs');
-    const path = require('path');
     
     try {
       const filename = `performance-results-${type}-${new Date().toISOString().split('T')[0]}.json`;
@@ -200,8 +200,6 @@ class PerformanceRunner {
    * Load previous results from file
    */
   loadResultsFromFile(type: 'baseline' | 'optimized', date?: string): any[] {
-    const fs = require('fs');
-    const path = require('path');
     
     try {
       const dateStr = date || new Date().toISOString().split('T')[0];

@@ -41,12 +41,11 @@ class OptimizedPerformanceTester {
   /**
    * High-precision timing utility
    */
-  private measurePerformance<T>(
+  private async measurePerformance<T>(
     name: string,
     fn: () => Promise<T>,
     tokensProcessed: number = 0
   ): Promise<{ result: T; metrics: OptimizedPerformanceMetrics }> {
-    return new Promise(async (resolve) => {
       const memoryBefore = this.getMemoryUsage();
       const startTime = performance.now();
 
@@ -62,8 +61,8 @@ class OptimizedPerformanceTester {
         const cacheStats = this.optimizedGeminiService.getCacheStats();
         const cacheHits = cacheStats.responseCache.size + cacheStats.textPreprocessingCache.size;
 
-        // Extract optimization metrics if available
-        const optimizationStats = this.optimizedEntityExtractor.getOptimizationStats();
+        // Extract optimization metrics if available (for future use)
+        this.optimizedEntityExtractor.getOptimizationStats();
         
         const metrics: OptimizedPerformanceMetrics = {
           name,
@@ -76,14 +75,12 @@ class OptimizedPerformanceTester {
         };
 
         this.metrics.push(metrics);
-        resolve({ result, metrics });
-
+        return { result, metrics };
       } catch (error) {
         console.error(`Optimized performance test failed for ${name}:`, error);
         throw error;
       }
-    });
-  }
+    }
 
   private getMemoryUsage(): number {
     if (typeof performance !== 'undefined' && (performance as any).memory) {
@@ -418,7 +415,7 @@ class MockOptimizedPerformanceTester extends OptimizedPerformanceTester {
     super('mock-key');
   }
 
-  async runMockOptimizedTests(config: typeof TEST_CONFIG): Promise<OptimizedPerformanceMetrics[]> {
+  async runMockOptimizedTests(_config: typeof TEST_CONFIG): Promise<OptimizedPerformanceMetrics[]> {
     console.log('🧪 Running Mock Optimized Performance Tests');
     console.log('=' .repeat(50));
     
@@ -464,7 +461,6 @@ class MockOptimizedPerformanceTester extends OptimizedPerformanceTester {
       }
     ];
 
-    this.metrics = mockMetrics;
     return mockMetrics;
   }
 }

@@ -11,7 +11,6 @@ import {
   ItalianEntity,
   ItalianEntityType,
   EntityExtractionResult,
-  ItalianEntityMetadata,
 } from '@/types/entities';
 import { OptimizedGeminiAPIService } from './optimizedGeminiAPI';
 import ItalianSemanticSearchService, { EnhancedEntity } from './semanticSearch';
@@ -353,7 +352,7 @@ export class OptimizedItalianEntityExtractor {
    * OPTIMIZED: Fast confidence scoring with memoization
    */
   private applyOptimizedConfidenceScoring(entities: any[]): any[] {
-    return entities.map((entity, index) => {
+    return entities.map((entity, _index) => {
       let confidence = entity.confidence || 0.5;
 
       // Boost confidence for known Italian entities (cached lookup)
@@ -439,7 +438,7 @@ export class OptimizedItalianEntityExtractor {
     return typeMapping[rawType?.toUpperCase()] || ItalianEntityType.MISCELLANEOUS;
   }
 
-  private createItalianEntity(rawEntity: any, index: number, originalText: string): ItalianEntity | null {
+  private createItalianEntity(rawEntity: any, index: number, _originalText: string): ItalianEntity | null {
     try {
       if (!rawEntity.text || typeof rawEntity.confidence !== 'number') {
         return null;

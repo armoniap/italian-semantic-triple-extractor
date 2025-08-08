@@ -3,7 +3,7 @@
  * Focuses on computational performance (text processing, pattern matching, etc.)
  */
 
-import PerformanceTester, { TEST_CONFIG } from './performance.test';
+import { TEST_CONFIG } from './performance.test';
 
 // Mock implementation of GeminiAPIService for performance testing
 class MockGeminiAPIService {
@@ -40,13 +40,13 @@ class MockGeminiAPIService {
 
   private generateMockEntities(text: string): any[] {
     const words = text.split(/\s+/);
-    const entities = [];
+    const entities: any[] = [];
     
     // Generate entities for known Italian patterns
     const italianCities = ['Roma', 'Milano', 'Napoli', 'Firenze', 'Venezia', 'Bologna', 'Torino'];
     const italianPersons = ['Leonardo', 'Michelangelo', 'Dante', 'Verdi', 'Garibaldi'];
     
-    words.forEach((word, index) => {
+    words.forEach((word, _index) => {
       const cleanWord = word.replace(/[.,!?;:]/g, '');
       
       if (italianCities.some(city => cleanWord.includes(city))) {
@@ -141,40 +141,38 @@ class MockPerformanceTester {
   /**
    * High-precision timing utility
    */
-  private measurePerformance<T>(
+  private async measurePerformance<T>(
     name: string, 
     fn: () => Promise<T>,
     tokensProcessed: number = 0
   ): Promise<{ result: T; metrics: any }> {
-    return new Promise(async (resolve) => {
       const memoryBefore = this.getMemoryUsage();
       const startTime = performance.now();
       
-      try {
-        const result = await fn();
-        
-        const endTime = performance.now();
-        const executionTime = endTime - startTime;
-        const memoryAfter = this.getMemoryUsage();
-        const memoryUsed = memoryAfter - memoryBefore;
-        
-        const metrics = {
-          name,
-          executionTime,
-          memoryUsed,
-          apiCalls: 1,
-          tokensProcessed,
-          throughputPerSecond: tokensProcessed / (executionTime / 1000)
-        };
-        
-        this.metrics.push(metrics);
-        resolve({ result, metrics });
-        
-      } catch (error) {
-        console.error(`Performance test failed for ${name}:`, error);
-        throw error;
-      }
-    });
+    try {
+      const result = await fn();
+      
+      const endTime = performance.now();
+      const executionTime = endTime - startTime;
+      const memoryAfter = this.getMemoryUsage();
+      const memoryUsed = memoryAfter - memoryBefore;
+      
+      const metrics = {
+        name,
+        executionTime,
+        memoryUsed,
+        apiCalls: 1,
+        tokensProcessed,
+        throughputPerSecond: tokensProcessed / (executionTime / 1000)
+      };
+      
+      this.metrics.push(metrics);
+      return { result, metrics };
+      
+    } catch (error) {
+      console.error(`Performance test failed for ${name}:`, error);
+      throw error;
+    }
   }
 
   private getMemoryUsage(): number {
@@ -377,7 +375,7 @@ class MockPerformanceTester {
 }
 
 // Run mock performance test
-async function runMockPerformanceTest(): Promise<void> {
+async function runMockPerformanceTest(): Promise<any[]> {
   console.log('🧪 Running Mock Performance Tests (No API Key Required)');
   console.log('='.repeat(55));
   
@@ -441,9 +439,9 @@ function runCPUBenchmark(): void {
   }));
   
   for (let i = 0; i < 1000; i++) {
-    const sorted = entities.sort((a, b) => b.confidence - a.confidence);
-    const filtered = sorted.filter(e => e.confidence > 0.5);
-    const mapped = filtered.map(e => ({ ...e, normalizedConfidence: e.confidence * 100 }));
+    const sorted = entities.sort((a: any, b: any) => b.confidence - a.confidence);
+    const filtered = sorted.filter((e: any) => e.confidence > 0.5);
+    filtered.map((e: any) => ({ ...e, normalizedConfidence: e.confidence * 100 }));
   }
   const arrayTime = performance.now() - startArrayOps;
   console.log(`  📊 Array Operations (1000x): ${arrayTime.toFixed(2)}ms`);

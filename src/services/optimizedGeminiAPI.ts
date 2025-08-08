@@ -56,7 +56,9 @@ class LRUCache<K, V> {
     } else if (this.cache.size >= this.maxSize) {
       // Remove least recently used
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
     }
     this.cache.set(key, value);
   }
@@ -403,12 +405,12 @@ export class OptimizedGeminiAPIService {
       // Smart boundary detection
       if (endOffset < text.length) {
         // Try to break at sentence boundaries first
-        let lastSentenceEnd = text.lastIndexOf('.', endOffset);
+        const lastSentenceEnd = text.lastIndexOf('.', endOffset);
         if (lastSentenceEnd > offset + chunkSize * 0.7) {
           endOffset = lastSentenceEnd + 1;
         } else {
           // Fallback to word boundaries
-          let lastWordEnd = text.lastIndexOf(' ', endOffset);
+          const lastWordEnd = text.lastIndexOf(' ', endOffset);
           if (lastWordEnd > offset + chunkSize * 0.8) {
             endOffset = lastWordEnd;
           }
