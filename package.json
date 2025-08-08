@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",
+    "chromadb": "^3.0.10",
     "crypto-js": "^4.2.0",
     "d3": "^7.8.5",
     "dompurify": "^3.0.7",

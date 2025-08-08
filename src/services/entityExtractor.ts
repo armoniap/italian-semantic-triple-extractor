@@ -10,6 +10,7 @@ import {
   ItalianEntityMetadata,
 } from '@/types/entities';
 import { GeminiAPIService } from './geminiAPI';
+import ItalianSemanticSearchService, { EnhancedEntity } from './semanticSearch';
 
 interface ItalianGeographicData {
   cities: Record<
@@ -29,16 +30,102 @@ interface ItalianGeographicData {
   monuments: Record<string, { city: string; region: string; type: string }>;
 }
 
+export interface EnhancedEntityExtractionResult extends EntityExtractionResult {
+  entities: EnhancedEntity[];
+  semanticInsights: string[];
+  culturalContext: string[];
+}
+
 export class ItalianEntityExtractor {
   private geminiService: GeminiAPIService;
   private italianGeoData: ItalianGeographicData;
+  private semanticSearchService?: ItalianSemanticSearchService;
+  private useSemanticEnhancement: boolean = false;
 
-  constructor(geminiService: GeminiAPIService) {
+  constructor(
+    geminiService: GeminiAPIService,
+    semanticSearchService?: ItalianSemanticSearchService
+  ) {
     this.geminiService = geminiService;
     this.italianGeoData = this.loadItalianGeographicData();
+
+    if (semanticSearchService) {
+      this.semanticSearchService = semanticSearchService;
+      this.useSemanticEnhancement = true;
+    }
+  }
+
+  /**
+   * Enable or disable semantic enhancement
+   */
+  setSemanticEnhancement(enabled: boolean): void {
+    this.useSemanticEnhancement = enabled && !!this.semanticSearchService;
   }
 
   async extractEntities(text: string): Promise<EntityExtractionResult> {
+    if (this.useSemanticEnhancement && this.semanticSearchService?.isReady()) {
+      return this.extractEntitiesWithSemanticEnhancement(text);
+    } else {
+      return this.extractEntitiesStandard(text);
+    }
+  }
+
+  /**
+   * Extract entities with semantic enhancement using vector search
+   */
+  async extractEntitiesWithSemanticEnhancement(
+    text: string
+  ): Promise<EnhancedEntityExtractionResult> {
+    const startTime = Date.now();
+
+    try {
+      console.log('Extracting entities with semantic enhancement...');
+
+      // Step 1: Standard extraction
+      const standardResult = await this.extractEntitiesStandard(text);
+
+      // Step 2: Semantic enhancement
+      if (!this.semanticSearchService) {
+        throw new Error('Semantic search service not available');
+      }
+
+      // Get semantic analysis (this will enhance entities with vector search)
+      const semanticAnalysis = await this.semanticSearchService.analyzeText(
+        text,
+        standardResult.entities,
+        [] // No triples in entity-only extraction
+      );
+
+      // Step 3: Extract cultural insights
+      const culturalContext = await this.extractCulturalContext(text);
+
+      const processingTime = Date.now() - startTime;
+
+      return {
+        ...standardResult,
+        entities: semanticAnalysis.entities,
+        semanticInsights: semanticAnalysis.culturalInsights,
+        culturalContext,
+        processingTime,
+      };
+    } catch (error) {
+      console.error('Semantic-enhanced entity extraction failed:', error);
+      // Fallback to standard extraction with empty semantic data
+      const standardResult = await this.extractEntitiesStandard(text);
+      return {
+        ...standardResult,
+        semanticInsights: [],
+        culturalContext: [],
+      };
+    }
+  }
+
+  /**
+   * Standard entity extraction without semantic enhancement
+   */
+  private async extractEntitiesStandard(
+    text: string
+  ): Promise<EntityExtractionResult> {
     const startTime = Date.now();
 
     try {
@@ -91,6 +178,56 @@ export class ItalianEntityExtractor {
       console.error('Entity extraction failed:', error);
       throw new Error('Failed to extract entities from text');
     }
+  }
+
+  /**
+   * Extract cultural context using Italian knowledge
+   */
+  private async extractCulturalContext(text: string): Promise<string[]> {
+    const culturalKeywords = [
+      'tradizione',
+      'cultura',
+      'storia',
+      'arte',
+      'cucina',
+      'festa',
+      'dialetto',
+      'regione',
+      'patrimonio',
+      'unesco',
+      'rinascimento',
+      'romano',
+      'medievale',
+    ];
+
+    const context: string[] = [];
+    const lowercaseText = text.toLowerCase();
+
+    culturalKeywords.forEach(keyword => {
+      if (lowercaseText.includes(keyword)) {
+        // Add contextual information based on cultural keywords
+        switch (keyword) {
+          case 'rinascimento':
+            context.push(
+              'Periodo artistico-culturale italiano (XV-XVI secolo)'
+            );
+            break;
+          case 'romano':
+            context.push("Relativo all'Impero Romano o alla città di Roma");
+            break;
+          case 'unesco':
+            context.push("Patrimonio mondiale dell'umanità UNESCO");
+            break;
+          case 'dialetto':
+            context.push('Varietà linguistiche regionali italiane');
+            break;
+          default:
+            context.push(`Contesto culturale italiano: ${keyword}`);
+        }
+      }
+    });
+
+    return context;
   }
 
   private createItalianEntity(
@@ -486,12 +623,8 @@ export class ItalianEntityExtractor {
           metadata: {
             region: geoData.region,
             province: geoData.province,
-            coordinates: geoData.coordinates
-              ? {
-                  latitude: geoData.coordinates[0],
-                  longitude: geoData.coordinates[1],
-                }
-              : undefined,
+            coordinatesLat: geoData.coordinates?.[0],
+            coordinatesLon: geoData.coordinates?.[1],
             culturalContext: 'Geografia italiana',
           },
         });

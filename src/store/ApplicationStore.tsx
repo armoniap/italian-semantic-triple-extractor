@@ -11,13 +11,16 @@ import { SecureStorage, UserPreferences } from '@/utils/storage';
 import { GeminiAPIService } from '@/services/geminiAPI';
 import { ItalianEntityExtractor } from '@/services/entityExtractor';
 import { ItalianTripleExtractor } from '@/services/tripleExtractor';
+import ItalianSemanticSearchService from '@/services/semanticSearch';
 
 export interface ApplicationState {
   // API and Services
   geminiService: GeminiAPIService | null;
   entityExtractor: ItalianEntityExtractor | null;
   tripleExtractor: ItalianTripleExtractor | null;
+  semanticSearchService: ItalianSemanticSearchService | null;
   isApiKeyValid: boolean;
+  useSemanticEnhancement: boolean;
 
   // User preferences
   preferences: UserPreferences;
@@ -54,6 +57,7 @@ export interface ApplicationState {
   toggleHighlightMode: () => void;
   setAnalysisError: (error: string | null) => void;
   applyTheme: () => void;
+  toggleSemanticEnhancement: () => void;
 }
 
 const useApplicationStore = create<ApplicationState>()(
@@ -63,7 +67,9 @@ const useApplicationStore = create<ApplicationState>()(
       geminiService: null,
       entityExtractor: null,
       tripleExtractor: null,
+      semanticSearchService: null,
       isApiKeyValid: false,
+      useSemanticEnhancement: false,
 
       preferences: SecureStorage.getPreferences(),
 
@@ -99,16 +105,34 @@ const useApplicationStore = create<ApplicationState>()(
             return false;
           }
 
-          // Initialize extractors
-          const entityExtractor = new ItalianEntityExtractor(geminiService);
+          // Initialize semantic search service
+          const semanticSearchService = new ItalianSemanticSearchService();
+
+          try {
+            await semanticSearchService.initialize(apiKey);
+            console.log('Semantic search service initialized successfully');
+          } catch (error) {
+            console.warn(
+              'Semantic search service initialization failed, using standard extraction:',
+              error
+            );
+          }
+
+          // Initialize extractors with optional semantic enhancement
+          const entityExtractor = new ItalianEntityExtractor(
+            geminiService,
+            semanticSearchService
+          );
           const tripleExtractor = new ItalianTripleExtractor(geminiService);
 
           set({
             geminiService,
             entityExtractor,
             tripleExtractor,
+            semanticSearchService,
             isApiKeyValid: true,
             analysisError: null,
+            useSemanticEnhancement: semanticSearchService.isReady(),
           });
 
           // Save API key securely
@@ -288,6 +312,29 @@ const useApplicationStore = create<ApplicationState>()(
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');
+        }
+      },
+
+      toggleSemanticEnhancement: () => {
+        const {
+          entityExtractor,
+          semanticSearchService,
+          useSemanticEnhancement,
+        } = get();
+
+        if (entityExtractor && semanticSearchService) {
+          const newState = !useSemanticEnhancement;
+          entityExtractor.setSemanticEnhancement(newState);
+
+          set({ useSemanticEnhancement: newState });
+
+          console.log(
+            `Semantic enhancement ${newState ? 'enabled' : 'disabled'}`
+          );
+        } else {
+          console.warn(
+            'Semantic enhancement not available - services not initialized'
+          );
         }
       },
     })),
