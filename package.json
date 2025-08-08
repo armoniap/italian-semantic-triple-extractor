@@ -14,7 +14,14 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,css,md}\"",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "perf:baseline": "tsx src/tests/runPerformanceTests.ts baseline",
+    "perf:real-optimized": "tsx src/tests/runPerformanceTests.ts optimized",
+    "perf:compare": "tsx src/tests/runPerformanceTests.ts compare",
+    "perf:full": "tsx src/tests/runPerformanceTests.ts full",
+    "perf:mock": "tsx src/tests/mockPerformanceTest.ts mock",
+    "perf:cpu": "tsx src/tests/mockPerformanceTest.ts cpu",
+    "perf:optimized": "tsx src/tests/optimizedPerformanceTest.ts mock"
   },
   "dependencies": {
     "@google/generative-ai": "^0.2.1",
@@ -52,6 +59,7 @@
     "process": "^0.11.10",
     "tailwindcss": "^3.3.6",
     "terser": "^5.43.1",
+    "tsx": "^4.7.0",
     "typescript": "^5.2.2",
     "vite": "^4.5.0",
     "vite-plugin-node-polyfills": "^0.24.0"
